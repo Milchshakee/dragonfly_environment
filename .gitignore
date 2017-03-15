@@ -1,0 +1,23 @@
+*.py[cod]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# IntelliJ
+.idea/
+*.iml
+
+# Ignore Natlink files
+core/
+
+config.json
