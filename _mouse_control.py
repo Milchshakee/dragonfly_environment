@@ -52,7 +52,7 @@ class MouseRule(MappingRule):
         "scroll": Function(toggle_scroll),
         "mark": Function(start_marking),
         "(left-click|click)": Mouse("left"),
-        "(double-click|select word now)": Mouse("left:down, left:up, left:down, left:up"),
+        "(double-click|select word)": Mouse("left:down, left:up, left:down, left:up"),
         "(select line)": Mouse("left:down, left:up, left:down, left:up, left:down, left:up"),
         "(right-click)": Mouse("right")
     }
