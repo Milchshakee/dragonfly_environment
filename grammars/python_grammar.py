@@ -2,24 +2,11 @@ from dragonfly import *
 
 import util.formatter
 
-from util.text import SCText
-
 DYN_MODULE_NAME = "python"
-INCOMPATIBLE_MODULES = [
-    'java',
-    'javascript',
-    'ruby',
-    'html',
-    'css'
-]
-
-
-def variable_name(text):
-    util.formatter.snake_case_text(text)
 
 
 def define_variable(text):
-    variable_name(text)
+    util.formatter.snake_case_text(text)
     Text(" = ").execute()
 
 
@@ -54,41 +41,37 @@ rules = MappingRule(
         "break": Text("break"),
         "comment": Text("# "),
         "class": Text("class "),
-        "class <text>": Function(define_class),
         "continue": Text("continue"),
         "del": Text("del "),
         "divided by": Text(" / "),
-        "(dict|dictionary) key value": Text("\"\": \"\",") + Key("left:6"),
         "enumerate": Text("enumerate()") + Key("left"),
         "(def|define|definition) function <text>": Function(define_function),
         "(def|define|definition) method <text>": Function(define_method),
         "(def|define|definition) init": Text("def __init__("),
+        "(def|define|definition) string": Text("\"\"") + Key("left"),
+        "[(def|define)] (var|variable) <text> equals": Function(define_variable),
+        "(def|define|definition) class <text>": Function(define_class),
+        "(var|variable) <text>": Function(util.formatter.snake_case_text),
+        "class <text>": Function(util.formatter.pascal_case_text),
         "doc string": Text('"""Doc string."""') + Key("left:14, s-right:11"),
         "else": Text("else:") + Key("enter"),
         "except": Text("except "),
         "exec": Text("exec "),
         "(el if|else if)": Text("elif "),
-        "(el if|else if) <text>": SCText("elif %(text)s"),
         "equals": Text(" == "),
         "false": Text("False"),
         "finally": Text("finally:") + Key("enter"),
         "for": Text("for "),
-        "for <text>": SCText("for %(text)s"),
         "from": Text("from "),
-        "from <text>": SCText("from %(text)s"),
         "global ": Text("global "),
         "greater than": Text(" > "),
         "greater [than] equals": Text(" >= "),
         "if": Text("if "),
-        "if <text>": SCText("if %(text)s"),
         "in": Text(" in "),
-        "in <text>": SCText("in %(text)s"),
-        "(int|I N T)": Text("int"),
         "(int|I N T)": Text("int()") + Key("left"),
         "init": Text("init"),
         "import": Text("import "),
-        "import <text>": SCText("import %(text)s"),
-        "(len|L E N)": Text("len("),
+        "(len|L E N)": Text("len()") + Key("left"),
         "lambda": Text("lambda "),
         "less than": Text(" < "),
         "less [than] equals": Text(" <= "),
@@ -105,17 +88,19 @@ rules = MappingRule(
         "print": Text("print()") + Key("left"),
         "raise": Text("raise"),
         "raise exception": Text("raise Exception()") + Key("left"),
-        "return": Text("return"),
-        "return <text>": SCText("return %(text)s"),
+        "return": Text("return "),
+        "return nothing": Text("return"),
         "self": Text("self"),
-        "(str|S T R)": Text("str"),
-        "(str|S T R) paren": Text("str()") + Key("left"),
+        "(str|S T R)": Text("str()") + Key("left"),
         "true": Text("True"),
         "try": Text("try:") + Key("enter"),
         "times": Text(" * "),
         "with": Text("with "),
         "while": Text("while "),
         "yield": Text("yield "),
+
+        "end (params|parameters)": Key("right:2"),
+
         # Some common modules.
         "datetime": Text("datetime"),
         "(io|I O)": Text("io"),
@@ -126,8 +111,6 @@ rules = MappingRule(
         "(sys|S Y S)": Text("sys"),
         "S Q lite 3": Text("sqlite3"),
         "subprocess": Text("subprocess"),
-        "(var|variable) <text>": Function(variable_name),
-        "[(def|define)] (var|variable) <text> equals": Function(define_variable),
     },
     extras=[
         IntegerRef("n", 1, 100),
@@ -170,7 +153,6 @@ def is_enabled():
         return False
 
 
-# Unload function which will be called at unload time.
 def unload():
     global grammar
     if grammar:

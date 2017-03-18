@@ -124,6 +124,17 @@ def paste_command():
     Key("c-v/3").execute()
 
 
+def import_dynamic_modules():
+
+    path = grammars.__path__
+    prefix = grammars.__name__ + "."
+    print("Loading dynamic grammar modules:")
+    for importer, package_name, _ in pkgutil.iter_modules(path, prefix):
+        if package_name not in sys.modules:
+            module = importer.find_module(package_name).load_module(package_name)
+            module_mapping[module.DYN_MODULE_NAME] = module
+            print("    %s" % package_name)
+
 commands = {
     "up [<n>]": Key("up:%(n)d"),
     "down [<n>]": Key("down:%(n)d"),

@@ -1,7 +1,6 @@
 from dragonfly import *
 
 import util.formatter
-from util.text import SCText
 
 DYN_MODULE_TYPE = "programming_language"
 DYN_MODULE_NAME = "java"
@@ -30,11 +29,9 @@ rules = MappingRule(
         "(bool|boolean)": Text("boolean "),
         "break": Text("break"),
         "case": Text("case "),
-        "case <text>": SCText("case %(text)s"),
         "catch": Text("catch () {") + Key("left:3"),
         "class": Text("class "),
         "comment": Text("// "),
-        "comment <text>": SCText("// %(text)s"),
         "continue": Text("continue"),
         "close comment": Text(" */"),
         "do": Text("do {"),
@@ -44,7 +41,6 @@ rules = MappingRule(
         "extends ": Text("extends "),
         "final": Text("final "),
         "for": Text("for () {") + Key("left:3"),
-        "for <text>": SCText("for (%(text)s) {") + Key("left:3"),
         "false": Text("false"),
         "finally": Text("finally {") + Key("enter"),
         "greater than": Text(" > "),
@@ -53,7 +49,6 @@ rules = MappingRule(
         "if <text>": Text("if (%(text)s) {") + Key("left:3"),
         "instanceof": Text("instanceof "),
         "(int|I N T)": Text("int "),
-        "(int|I N T) <text>": SCText("int %(text)s"),
         "less than": Text(" < "),
         "less equals": Text(" <= "),
         "(line end|end line)": Key("end") + Text(";") + Key("enter"),
@@ -71,18 +66,15 @@ rules = MappingRule(
         "protected": Text("protected "),
         "public": Text("public "),
         "return": Text("return "),
-        "return <text>": SCText("return %(text)s"),
         "static": Text("static "),
         "string": Text("String"),
         "switch": Text("switch () {") + Key("left:3"),
-        "switch <text>": SCText("switch (%(text)s) {") + Key("left:3"),
         "this": Text("this"),
         "throw": Text("throw "),
         "true": Text("true"),
         "try": Text("try {") + Key("enter"),
         "toString": Text("toString()") + Key("left"),
         "while": Text("while () {") + Key("left:3"),
-        "while <text>": SCText("while (%(text)s) {") + Key("left:3"),
     },
     extras=[
         IntegerRef("n", 1, 100),
