@@ -16,7 +16,6 @@ if 'semicolon' not in typeables:
 grammar = Grammar("symbols")
 
 common_symbols = {
-    "(bar|vertical bar|pipe)": "|",
     "(dash|minus|hyphen)": "-",
     "(dot|period)": ".",
     "comma": ",",
@@ -26,7 +25,9 @@ common_symbols = {
     "colon": ":",
     "(semicolon|semi-colon)": ";",
     "slash": "/",
-    "space": " "
+    "space": " ",
+    "[double] quote": '"',
+    "single quote": "'",
 }
 
 
@@ -41,18 +42,17 @@ grammar.add_rule(CommonSymbolRule())
 
 rare_symbols = {
     "at": "@",
-    "[double] quote": '"',
-    "single quote": "'",
     "hash": "#",
     "dollar": "$",
     "percent": "%",
     "and": "&",
     "equal": "=",
-    "plus": "+"
+    "plus": "+",
+    "(bar|vertical bar|pipe)": "|"
 }
 
 
-class SymbolRule(CompoundRule):
+class RareSymbolRule(CompoundRule):
 
     spec = "<symbol> (sign|symbol)"
     extras = [Choice("symbol", rare_symbols)]
@@ -60,6 +60,8 @@ class SymbolRule(CompoundRule):
     def _process_recognition(self, node, extras):
         symbol = extras["symbol"]
         Text(symbol).execute()
+
+grammar.add_rule(RareSymbolRule())
 
 letter_map = {
     "(A|alpha)": ("a", "A"),
