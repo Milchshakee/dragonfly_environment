@@ -177,7 +177,6 @@ commands = {
 
 
 class KeystrokeRule(MappingRule):
-    exported = False
     mapping = commands
     extras = [
         IntegerRef("n", 1, 100),
