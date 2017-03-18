@@ -117,12 +117,17 @@ grammar.add_rule(CapitalLetterRule())
 
 class NumberRule(CompoundRule):
 
-    spec = "number <n>"
-    extras = [NumberRef("n", True)]
+    spec = "number <m> [point <n>]"
+    extras = [NumberRef("m", True), NumberRef("n", True)]
 
     def _process_recognition(self, node, extras):
-        number = extras["n"]
-        Text(str(number)).execute()
+        integer = extras["m"]
+        number = str(integer)
+        if "n" in extras:
+            floating_point = extras["n"]
+            number += "." + str(floating_point)
+
+        Text(number).execute()
 
 grammar.add_rule(NumberRule())
 grammar.load()
