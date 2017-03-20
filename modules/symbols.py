@@ -38,7 +38,7 @@ rare_symbols = {
     "at": "@",
     "hash": "#",
     "dollar": "$",
-    "percent": "%",
+    "percent": "%%",
     "and": "&",
     "equal": "=",
     "plus": "+",
