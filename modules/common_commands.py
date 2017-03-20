@@ -1,15 +1,5 @@
-"""A command module for Dragonfly, for generic editing help.
-
------------------------------------------------------------------------------
-This is a heavily modified version of the _multiedit-en.py script at:
-http://dragonfly-modules.googlecode.com/svn/trunk/command-modules/documentation/mod-_multiedit.html  # @IgnorePep8
-Licensed under the LGPL, see http://www.gnu.org/licenses/
-
-"""
 from dragonfly import *
-from _mouse_control import stop_marking
-
-grammar = Grammar("common commands")
+from mouse_control import stop_marking
 
 abbreviationMap = {
     "administrator": "admin",
@@ -124,17 +114,6 @@ def paste_command():
     Key("c-v/3").execute()
 
 
-def import_dynamic_modules():
-
-    path = grammars.__path__
-    prefix = grammars.__name__ + "."
-    print("Loading dynamic grammar modules:")
-    for importer, package_name, _ in pkgutil.iter_modules(path, prefix):
-        if package_name not in sys.modules:
-            module = importer.find_module(package_name).load_module(package_name)
-            module_mapping[module.DYN_MODULE_NAME] = module
-            print("    %s" % package_name)
-
 commands = {
     "up [<n>]": Key("up:%(n)d"),
     "down [<n>]": Key("down:%(n)d"),
@@ -199,12 +178,8 @@ class KeystrokeRule(MappingRule):
         "n": 1,
     }
 
-grammar.add_rule(KeystrokeRule())
-grammar.load()
 
-
-def unload():
-    global grammar
-    if grammar:
-        grammar.unload()
-    grammar = None
+def create_grammar():
+    grammar = Grammar("common commands")
+    grammar.add_rule(KeystrokeRule())
+    return grammar, True

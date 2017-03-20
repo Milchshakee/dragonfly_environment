@@ -1,32 +1,32 @@
 from dragonfly import *
 
-import util.formatter
+import modules.util.formatter
 
 DYN_MODULE_NAME = "python"
 
 
 def define_variable(text):
-    util.formatter.snake_case_text(text)
+    modules.util.formatter.snake_case_text(text)
     Text(" = ").execute()
 
 
 def define_function(text):
     Text("def ").execute()
-    util.formatter.snake_case_text(text)
+    modules.util.formatter.snake_case_text(text)
     Text("():").execute()
     Key("left:2").execute()
 
 
 def define_method(text):
     Text("def ").execute()
-    util.formatter.snake_case_text(text)
+    modules.util.formatter.snake_case_text(text)
     Text("(self, ):").execute()
     Key("left:2").execute()
 
 
 def define_class(text):
     Text("class ").execute()
-    util.formatter.pascal_case_text(text)
+    modules.util.formatter.pascal_case_text(text)
     Text("():").execute()
     Key("left:2").execute()
 
@@ -51,8 +51,8 @@ rules = MappingRule(
         "(def|define|definition) string": Text("\"\"") + Key("left"),
         "[(def|define)] (var|variable) <text> equals": Function(define_variable),
         "(def|define|definition) class <text>": Function(define_class),
-        "(var|variable) <text>": Function(util.formatter.snake_case_text),
-        "class <text>": Function(util.formatter.pascal_case_text),
+        "(var|variable) <text>": Function(modules.util.formatter.snake_case_text),
+        "class <text>": Function(modules.util.formatter.pascal_case_text),
         "doc string": Text('"""Doc string."""') + Key("left:14, s-right:11"),
         "else": Text("else:") + Key("enter"),
         "except": Text("except "),
@@ -121,40 +121,8 @@ rules = MappingRule(
     }
 )
 
-grammar = Grammar("Python grammar")
-grammar.add_rule(rules)
-grammar.load()
-grammar.disable()
 
-
-def dynamic_enable():
-    global grammar
-    if grammar.enabled:
-        return False
-    else:
-        grammar.enable()
-        return True
-
-
-def dynamic_disable():
-    global grammar
-    if grammar.enabled:
-        grammar.disable()
-        return True
-    else:
-        return False
-
-
-def is_enabled():
-    global grammar
-    if grammar.enabled:
-        return True
-    else:
-        return False
-
-
-def unload():
-    global grammar
-    if grammar:
-        grammar.unload()
-    grammar = None
+def create_grammar():
+    grammar = Grammar("Python grammar")
+    grammar.add_rule(rules)
+    return grammar, False

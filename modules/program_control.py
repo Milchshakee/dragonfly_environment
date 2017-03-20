@@ -6,12 +6,6 @@ from dragonfly import (Grammar, Alternative, RuleRef, DictListRef,
                        Config, Section, Item, FocusWindow, ActionError)
 
 
-grammar = Grammar("window control")
-
-config = Config("Settings")
-config.settings = Section("Settings")
-config.settings.commands = Item({})
-config.load()
 
 
 executable_names = DictList("executable_names", config.settings.commands)
@@ -36,7 +30,6 @@ class CommandRule(CompoundRule):
             current_executable = config.settings.commands[extras["executable_names"]]["path"]
             available_configurations = config.settings.commands[extras["executable_names"]]["configurations"]
 
-grammar.add_rule(CommandRule())
 
 
 class ConfigRule(CompoundRule):
@@ -48,11 +41,16 @@ class ConfigRule(CompoundRule):
         global current_configuration
         current_configuration = available_configurations[]
 
-grammar.add_rule(ConfigRule())
+
+def create_grammar():
+    grammar = Grammar("program control")
+    grammar.add_rule(CommandRule())
+    grammar.add_rule(ConfigRule())
+    return grammar, True
 
 
-grammar.load()
-def unload():
-    global grammar
-    if grammar: grammar.unload()
-    grammar = None
+def load_config():
+    config = Config("Settings")
+    config.settings = Section("Settings")
+    config.settings.commands = Item({})
+    config.load()

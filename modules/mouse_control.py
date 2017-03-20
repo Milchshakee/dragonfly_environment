@@ -1,13 +1,8 @@
-import time
-import win32api, win32con, win32gui
-from dragonfly import (Grammar, Key, Mouse, DictListRef,
-                       Dictation, Compound, Rule, CompoundRule,
-                       DictList, Window, Rectangle, monitors,
-                       Config, Section, Function, MappingRule)
-
+import win32api, win32con
 import dragonfly.timer
+from dragonfly import *
 
-grammar = Grammar("mouse control")
+
 scroll_position = None
 scrolling = False
 marking = False
@@ -59,9 +54,6 @@ def call():
         win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, x, y, get_scroll_amount(-dy))
 
 
-dragonfly.timer.timer.add_callback(call, 0.01)
-
-
 def toggle_scroll():
     global scrolling
     global scroll_position
@@ -79,13 +71,17 @@ class MouseRule(MappingRule):
         "(right-click)": Mouse("right")
     }
 
-grammar.add_rule(MouseRule())
-grammar.load()
+
+def create_grammar():
+    grammar = Grammar("mouse control")
+    grammar.add_rule(MouseRule())
+    return grammar, True
+
+
+def load():
+    dragonfly.timer.timer.add_callback(call, 0.01)
 
 
 def unload():
-    global grammar
-    if grammar:
-        grammar.unload()
-        dragonfly.timer.timer.remove_callback(call)
-    grammar = None
+    dragonfly.timer.timer.remove_callback(call)
+

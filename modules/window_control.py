@@ -52,34 +52,11 @@ from dragonfly import (Grammar, Alternative, RuleRef, DictListRef,
                        Config, Section, Item, FocusWindow, ActionError)
 
 
-grammar = Grammar("window control")
-
-config = Config("Settings")
-config.names = Section("Custom names")
-config.names.executable_names = Item({})
-config.names.monitor_names = Item({})
-config.load()
-
-
-executable_names = DictList("executable_names")
-executable_names_ref = DictListRef("executable_names", executable_names)
-
-for key, value in config.names.executable_names.iteritems():
-    executable_names[key] = value
-
-
 window_names = DictList("window_names")
 window_names_ref = DictListRef("window_names", window_names)
 
-
-monitor_names     = DictList("monitor_names")
+monitor_names = DictList("monitor_names")
 monitor_names_ref = DictListRef("monitor_names", monitor_names)
-
-for i, m in enumerate(monitors):
-    monitor_names[str(i+1)] = m
-
-for key, value in config.names.monitor_names.iteritems():
-    monitor_names[key] = monitors[value]
 
 
 class WinSelectorRule(CompoundRule):
@@ -122,8 +99,6 @@ class NameWinRule(CompoundRule):
         window_names[name] = window
         self._log.debug("%s: named foreground window '%s'." % (self, window))
 
-grammar.add_rule(NameWinRule())
-
 
 class FocusWinRule(CompoundRule):
 
@@ -147,8 +122,6 @@ class FocusWinRule(CompoundRule):
             else:
                 break
 
-grammar.add_rule(FocusWinRule())
-
 
 class FocusTitleRule(CompoundRule):
 
@@ -162,8 +135,6 @@ class FocusTitleRule(CompoundRule):
             action.execute()
         except ActionError:
             self._log.warning("No window with that name found.")
-
-grammar.add_rule(FocusTitleRule())
 
 
 horz_left = Compound("left", name="horz", value=0.0)
@@ -202,9 +173,6 @@ class CloseRule(CompoundRule):
         win32api.PostMessage(win32gui.FindWindow(0, window.title), win32con.WM_CLOSE, 0, 0)
 
 
-grammar.add_rule(CloseRule())
-
-
 class MinimizeRule(CompoundRule):
     spec = "minimize <win_selector>"
     extras = [
@@ -214,9 +182,6 @@ class MinimizeRule(CompoundRule):
     def _process_recognition(self, node, extras):
         window = extras["win_selector"]
         win32gui.ShowWindow(win32gui.FindWindow(0, window.title), win32con.SW_MINIMIZE)
-
-
-grammar.add_rule(MinimizeRule())
 
 
 class FullscreenRule(CompoundRule):
@@ -229,9 +194,6 @@ class FullscreenRule(CompoundRule):
     def _process_recognition(self, node, extras):
         window = extras["win_selector"]
         window.set_position(extras["mon_selector"].rectangle)
-
-
-grammar.add_rule(FullscreenRule())
 
 
 class TranslateRule(CompoundRule):
@@ -272,8 +234,6 @@ class TranslateRule(CompoundRule):
         # Translate and move window.
         pos.translate(dx + monitor_move_x, dy + monitor_move_y)
         window.set_position(pos)
-
-grammar.add_rule(TranslateRule())
 
 
 class ResizeRule(CompoundRule):
@@ -318,8 +278,6 @@ class ResizeRule(CompoundRule):
         pos = Rectangle(x1, y1, x2-x1, y2-y1)
         window.set_position(pos)
 
-grammar.add_rule(ResizeRule())
-
 
 class StretchRule(CompoundRule):
 
@@ -351,11 +309,29 @@ class StretchRule(CompoundRule):
         pos = Rectangle(x1, y1, x2-x1, y2-y1)
         window.set_position(pos)
 
-grammar.add_rule(StretchRule())
+
+def load_config():
+    config = Config("Settings")
+    config.names = Section("Custom names")
+    config.names.monitor_names = Item({})
+    config.load()
+
+    for i, m in enumerate(monitors):
+        monitor_names[str(i + 1)] = m
+
+    for key, value in config.names.monitor_names.iteritems():
+        monitor_names[key] = monitors[value]
 
 
-grammar.load()
-def unload():
-    global grammar
-    if grammar: grammar.unload()
-    grammar = None
+def create_grammar():
+    grammar = Grammar("window control")
+    grammar.add_rule(NameWinRule())
+    grammar.add_rule(FocusWinRule())
+    grammar.add_rule(FocusTitleRule())
+    grammar.add_rule(CloseRule())
+    grammar.add_rule(MinimizeRule())
+    grammar.add_rule(FullscreenRule())
+    grammar.add_rule(TranslateRule())
+    grammar.add_rule(ResizeRule())
+    grammar.add_rule(StretchRule())
+    return grammar, True

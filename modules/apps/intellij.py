@@ -1,13 +1,6 @@
-"""A command module for Dragonfly, for controlling IntelliJ IDEA-based IDEs.
-
------------------------------------------------------------------------------
-Licensed under the LGPL3.
-
-"""
-
 from dragonfly import *
 
-import util.formatter
+import modules.util.formatter
 
 mapping = {
     # Code execution.
@@ -17,12 +10,15 @@ mapping = {
     "stop running": Key("c-f2"),
 
     # Code navigation.
-    "navigate to class <text>": Key("c-n") + Pause("30") + Function(util.formatter.pascal_case_text) + Pause("30") + Key("enter"),
-    "navigate to class chooser <text>": Key("c-n") + Pause("30") + Function(util.formatter.pascal_case_text) + Pause("30"),
-    "navigate to file <text>": Key("cs-n") + Pause("30") + Function(util.formatter.camel_case_text) + Pause("30") + Key("enter"),
-    "navigate to file chooser <text>": Key("cs-n") + Pause("30") + Function(util.formatter.camel_case_text) + Pause("30"),
-    "navigate to symbol <text>": Key("cas-n") + Pause("30") + Function(util.formatter.camel_case_text) + Pause("30") + Key("enter"),
-    "navigate to symbol chooser <text>": Key("cas-n") + Pause("30") + Function(util.formatter.camel_case_text) + Pause("30"),
+    "navigate to class <text>": Key("c-n") + Pause("30") + Function(modules.util.formatter.pascal_case_text) + Pause("30") + Key("enter"),
+    "navigate to class chooser <text>": Key("c-n") + Pause("30") + Function(
+        modules.util.formatter.pascal_case_text) + Pause("30"),
+    "navigate to file <text>": Key("cs-n") + Pause("30") + Function(modules.util.formatter.camel_case_text) + Pause("30") + Key("enter"),
+    "navigate to file chooser <text>": Key("cs-n") + Pause("30") + Function(
+        modules.util.formatter.camel_case_text) + Pause("30"),
+    "navigate to symbol <text>": Key("cas-n") + Pause("30") + Function(modules.util.formatter.camel_case_text) + Pause("30") + Key("enter"),
+    "navigate to symbol chooser <text>": Key("cas-n") + Pause("30") + Function(
+        modules.util.formatter.camel_case_text) + Pause("30"),
     "go to declaration": Key("c-b"),
     "go to implementation": Key("ca-b"),
     "go to super": Key("c-u"),
@@ -79,13 +75,11 @@ mapping = {
     "(refactor|re-factor) extract variable": Key("ca-v"),
     "(refactor|re-factor) extract method": Key("ca-m"),
     "(refactor|re-factor) (in line|inline)": Key("ca-n"),
-	
+
 	"next word": Key("c-right"),
 	"previous word": Key("c-left"),
 }
 
-idea_context = AppContext(executable="pycharm")
-winContext = idea_context
 
 class CommandRule(MappingRule):
     mapping = mapping
@@ -95,12 +89,9 @@ class CommandRule(MappingRule):
         IntegerRef("n", 1, 50000)
     ]
 
-grammar = Grammar("idea_general", context=winContext)
-grammar.add_rule(CommandRule())
-grammar.load()
 
-# Unload function which will be called by natlink at unload time.
-def unload():
-  global grammar
-  if grammar: grammar.unload()
-  grammar = None
+def create_grammar():
+    idea_context = AppContext(executable="pycharm")
+    grammar = Grammar("idea_general", context=idea_context)
+    grammar.add_rule(CommandRule())
+    return grammar, True

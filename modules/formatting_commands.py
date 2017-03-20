@@ -1,13 +1,6 @@
-"""A command module for Dragonfly, for generic editing help.
-
------------------------------------------------------------------------------
-This is a heavily modified version of the _multiedit-en.py script at:
-http://dragonfly-modules.googlecode.com/svn/trunk/command-modules/documentation/mod-_multiedit.html  # @IgnorePep8
-Licensed under the LGPL, see http://www.gnu.org/licenses/
-
-"""
 from dragonfly import *
-from util.formatter import (
+
+from modules.util.formatter import (
     camel_case_count,
     pascal_case_count,
     snake_case_count,
@@ -69,13 +62,8 @@ class FormatRule(MappingRule):
         "n": 1,
     }
 
-grammar = Grammar("Generic edit")
-grammar.add_rule(FormatRule())
-grammar.load()
 
-
-def unload():
-    global grammar
-    if grammar:
-        grammar.unload()
-    grammar = None
+def create_grammar():
+    grammar = Grammar("Generic edit")
+    grammar.add_rule(FormatRule())
+    return grammar, True

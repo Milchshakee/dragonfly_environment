@@ -38,18 +38,13 @@ mapping = {
     "run": Key("r:down/3, r:up/3")
 }
 
-mc_context = AppContext(title="Minecraft 1.10.2")
-
 
 class CommandRule(MappingRule):
     mapping = mapping
 
-grammar = Grammar("minecraft", context=mc_context)
-grammar.add_rule(CommandRule())
-grammar.load()
 
-
-def unload():
-  global grammar
-  if grammar: grammar.unload()
-  grammar = None
+def create_grammar():
+    mc_context = AppContext(title="Minecraft 1.10.2")
+    grammar = Grammar("minecraft", context=mc_context)
+    grammar.add_rule(CommandRule())
+    return grammar, True

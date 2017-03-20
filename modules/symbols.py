@@ -10,11 +10,6 @@ from dragonfly import *
 from dragonfly.actions.keyboard import keyboard
 from dragonfly.actions.typeables import typeables
 
-if 'semicolon' not in typeables:
-    typeables["semicolon"] = keyboard.get_typeable(char=';')
-
-grammar = Grammar("symbols")
-
 common_symbols = {
     "(dash|minus|hyphen)": "-",
     "(dot|period)": ".",
@@ -38,7 +33,6 @@ class CommonSymbolRule(MappingRule):
     def _process_recognition(self, node, extras):
         Text(node).execute()
 
-grammar.add_rule(CommonSymbolRule())
 
 rare_symbols = {
     "at": "@",
@@ -61,7 +55,6 @@ class RareSymbolRule(CompoundRule):
         symbol = extras["symbol"]
         Text(symbol).execute()
 
-grammar.add_rule(RareSymbolRule())
 
 letter_map = {
     "(A|alpha)": ("a", "A"),
@@ -102,8 +95,6 @@ class LetterRule(CompoundRule):
         letter = extras["letter"][0]
         Text(letter).execute()
 
-grammar.add_rule(LetterRule())
-
 
 class CapitalLetterRule(CompoundRule):
 
@@ -113,8 +104,6 @@ class CapitalLetterRule(CompoundRule):
     def _process_recognition(self, node, extras):
         letter = extras["letter"][1]
         Text(letter).execute()
-
-grammar.add_rule(CapitalLetterRule())
 
 
 class NumberRule(CompoundRule):
@@ -131,12 +120,17 @@ class NumberRule(CompoundRule):
 
         Text(number).execute()
 
-grammar.add_rule(NumberRule())
-grammar.load()
+
+def create_grammar():
+    grammar = Grammar("symbols")
+    grammar.add_rule(CommonSymbolRule())
+    grammar.add_rule(RareSymbolRule())
+    grammar.add_rule(LetterRule())
+    grammar.add_rule(CapitalLetterRule())
+    grammar.add_rule(NumberRule())
+    return grammar, True
 
 
-def unload():
-    global grammar
-    if grammar:
-        grammar.unload()
-    grammar = None
+def load():
+    if 'semicolon' not in typeables:
+        typeables["semicolon"] = keyboard.get_typeable(char=';')
