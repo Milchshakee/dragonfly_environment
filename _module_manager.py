@@ -2,11 +2,7 @@ import sys
 import os
 import pkgutil
 import imp
-from dragonfly import (
-    MappingRule,
-    Function,
-    Grammar
-)
+from dragonfly import *
 
 loaded_modules = {}
 
@@ -50,16 +46,16 @@ def load_modules():
     load_package("modules")
 
     for module in loaded_modules.keys():
-        if "load" in module.__dict__:
-            module.load()
-        if "load_config" in module.__dict__:
-            module.load_config()
         if "create_grammar" in module.__dict__:
             loaded_grammar = module.create_grammar()
             loaded_grammar[0].load()
             if not loaded_grammar[1]:
                 loaded_grammar[0].disable()
             loaded_modules[module] = loaded_grammar[0]
+        if "load" in module.__dict__:
+            module.load()
+        if "load_config" in module.__dict__:
+            module.load_config()
 
 
 def unload_modules():
@@ -77,13 +73,42 @@ def unload_modules():
         del module
 
 
-commands = MappingRule(
-    mapping={
-        "reload modules": Function(unload_modules) + Function(load_modules)
-    }
-)
+def enable_grammar(g):
+    if g.enabled:
+        print("Grammar %s is already enabled" % g.name)
+    else:
+        g.enable()
+        print("Grammar %s enabled" % g.name)
+
+
+def disable_grammar(g):
+    if not g.enabled:
+        print("Grammar %s is not enabled" % g.name)
+    else:
+        g.disable()
+        print("Grammar %s disabled" % g.name)
+
+
+def reload_configurations():
+    for module in loaded_modules.keys():
+        if "reload_config" in module.__dict__:
+            module.reload_config()
+    print("Reloaded configurations")
+
 
 load_modules()
+
+commands = MappingRule(
+    mapping={
+        "reload modules": Function(unload_modules) + Function(load_modules),
+        "enable <g> grammar": Function(enable_grammar),
+        "disable <g> grammar": Function(disable_grammar),
+        "reload configurations": Function(reload_configurations)
+
+    },
+    extras=[Choice("g", dict((g.name, g) for g in filter(lambda g: g is not None, loaded_modules.values())))]
+)
+
 grammar = Grammar("Dynamic manager")
 grammar.add_rule(commands)
 grammar.load()

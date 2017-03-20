@@ -310,11 +310,13 @@ class StretchRule(CompoundRule):
         window.set_position(pos)
 
 
-def load_config():
+def reload_config():
     config = Config("Settings")
     config.names = Section("Custom names")
     config.names.monitor_names = Item({})
     config.load()
+
+    monitor_names.clear()
 
     for i, m in enumerate(monitors):
         monitor_names[str(i + 1)] = m

@@ -49,7 +49,7 @@ def create_grammar():
     return grammar, True
 
 
-def load_config():
+def reload_config():
     config = Config("Settings")
     config.settings = Section("Settings")
     config.settings.commands = Item({})
