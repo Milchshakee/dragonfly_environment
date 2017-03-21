@@ -141,7 +141,7 @@ commands = MappingRule(
     extras=[loaded_grammars_ref]
 )
 
-grammar = Grammar("Dynamic manager")
+grammar = Grammar("module manager")
 grammar.add_rule(commands)
 grammar.load()
 

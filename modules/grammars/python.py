@@ -123,6 +123,6 @@ rules = MappingRule(
 
 
 def create_grammar():
-    grammar = Grammar("Python grammar")
+    grammar = Grammar("python")
     grammar.add_rule(rules)
     return grammar, False

@@ -326,7 +326,7 @@ def reload_config():
 
 
 def create_grammar():
-    grammar = Grammar("window control")
+    grammar = Grammar("window")
     grammar.add_rule(NameWinRule())
     grammar.add_rule(FocusWinRule())
     grammar.add_rule(FocusTitleRule())

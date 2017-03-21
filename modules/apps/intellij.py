@@ -92,6 +92,6 @@ class CommandRule(MappingRule):
 
 def create_grammar():
     idea_context = AppContext(executable="pycharm")
-    grammar = Grammar("idea_general", context=idea_context)
+    grammar = Grammar("pycharm", context=idea_context)
     grammar.add_rule(CommandRule())
     return grammar, True

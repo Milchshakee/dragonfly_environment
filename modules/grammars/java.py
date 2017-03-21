@@ -79,6 +79,6 @@ rules = MappingRule(
 
 
 def create_grammar():
-    grammar = Grammar("Java grammar")
+    grammar = Grammar("java")
     grammar.add_rule(rules)
     return grammar, False

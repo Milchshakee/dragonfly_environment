@@ -1,5 +1,5 @@
 from dragonfly import *
-from mouse_control import stop_marking
+from mouse import stop_marking
 
 abbreviationMap = {
     "administrator": "admin",
@@ -180,6 +180,6 @@ class KeystrokeRule(MappingRule):
 
 
 def create_grammar():
-    grammar = Grammar("common commands")
+    grammar = Grammar("miscellaneous")
     grammar.add_rule(KeystrokeRule())
     return grammar, True

@@ -64,6 +64,6 @@ class FormatRule(MappingRule):
 
 
 def create_grammar():
-    grammar = Grammar("Generic edit")
+    grammar = Grammar("formatting")
     grammar.add_rule(FormatRule())
     return grammar, True

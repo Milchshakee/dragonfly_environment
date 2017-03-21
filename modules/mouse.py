@@ -73,7 +73,7 @@ class MouseRule(MappingRule):
 
 
 def create_grammar():
-    grammar = Grammar("mouse control")
+    grammar = Grammar("mouse")
     grammar.add_rule(MouseRule())
     return grammar, True
 

@@ -43,7 +43,7 @@ class ConfigRule(CompoundRule):
 
 
 def create_grammar():
-    grammar = Grammar("program control")
+    grammar = Grammar("program")
     grammar.add_rule(CommandRule())
     grammar.add_rule(ConfigRule())
     return grammar, True
