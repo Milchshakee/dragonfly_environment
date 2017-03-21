@@ -2,9 +2,12 @@ import sys
 import os
 import pkgutil
 import imp
+import traceback
 from dragonfly import *
 
-loaded_modules = {}
+loaded_modules = []
+loaded_grammars = DictList("g")
+loaded_grammars_ref = DictListRef("g", loaded_grammars)
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -16,25 +19,28 @@ def load_package(path):
     package_tuple = imp.find_module(package_name, [os.path.dirname(absolute_path)])
     package = imp.load_module(package_dotted_name, *package_tuple)
 
-    loaded_modules[package] = None
-    print("Loaded package %s" % package_dotted_name)
+    loaded_modules.append(package)
+    print(" - pkg %s" % package_dotted_name)
 
     prefix = package_dotted_name + "."
-    for importer, module_name, _ in pkgutil.iter_modules([package_tuple[1]], prefix):
+    for importer, module_name, ispkg in pkgutil.iter_modules([package_tuple[1]], prefix):
+        if ispkg:
+            continue
+
         if module_name in sys.modules:
             module = sys.modules[module_name]
-            print("Module %s already loaded" % module_name)
+            print(" - (%s)" % module_name)
         else:
             try:
                 module = importer.find_module(module_name).load_module(module_name)
-            except Exception, cause:
+            except:
                 print("Could not load %s:" % module_name)
-                print(cause)
+                print(traceback.format_exc())
                 continue
             else:
-                print("Loaded module %s" % module_name)
+                print(" - %s" % module_name)
 
-        loaded_modules[module] = None
+        loaded_modules.append(module)
 
     directories = [f for f in os.listdir(absolute_path) if os.path.isdir(os.path.join(absolute_path, f))]
     for directory in directories:
@@ -42,35 +48,58 @@ def load_package(path):
 
 
 def load_modules():
-    print("Loading modules:")
+    print("\nLoading modules:")
     load_package("modules")
 
-    for module in loaded_modules.keys():
-        if "create_grammar" in module.__dict__:
-            loaded_grammar = module.create_grammar()
-            loaded_grammar[0].load()
-            if not loaded_grammar[1]:
-                loaded_grammar[0].disable()
-            loaded_modules[module] = loaded_grammar[0]
+    print("\nInitializing modules:")
+    for module in loaded_modules:
         if "load" in module.__dict__:
-            module.load()
-        if "load_config" in module.__dict__:
-            module.load_config()
+            try:
+                module.load()
+                print(" - %s" % module.__name__)
+            except:
+                print("Could not initialize %s:" % module.__name__)
+                print(traceback.format_exc())
+                continue
+
+
+def load_grammars():
+    print("\nLoading grammars:")
+    for module in loaded_modules:
+        if "create_grammar" in module.__dict__:
+            try:
+                loaded_grammar, enabled = module.create_grammar()
+            except:
+                print("Could not load grammar of %s:" % module.__name__)
+                print(traceback.format_exc())
+                continue
+            loaded_grammar.load()
+            if not enabled:
+                loaded_grammar.disable()
+            loaded_grammars[loaded_grammar.name] = loaded_grammar
+            print(" - %s" % loaded_grammar.name)
 
 
 def unload_modules():
-    for module in loaded_modules.keys():
-        if "unload" in module.__dict__:
-            module.unload()
-
-        module_grammar = loaded_modules[module]
-        if module_grammar is not None:
-            module_grammar.unload()
-
-    for module in loaded_modules.copy().keys():
-        del loaded_modules[module]
+    print("\nUnloading modules:")
+    for module in list(loaded_modules):
+        try:
+            if "unload" in module.__dict__:
+                module.unload()
+        except:
+            print("Could not unload %s:" % module.__name__)
+            print(traceback.format_exc())
+            continue
+        loaded_modules.remove(module)
         del sys.modules[module.__name__]
+        print(" - %s" % module.__name__)
         del module
+
+
+def unload_grammars():
+    for g in loaded_grammars.values():
+        g.unload()
+    loaded_grammars.clear()
 
 
 def enable_grammar(g):
@@ -90,13 +119,16 @@ def disable_grammar(g):
 
 
 def reload_configurations():
-    for module in loaded_modules.keys():
+    print("\nLoading configurations:")
+    for module in loaded_modules:
         if "reload_config" in module.__dict__:
             module.reload_config()
-    print("Reloaded configurations")
+            print(" - %s" % module.__name__)
 
 
 load_modules()
+reload_configurations()
+load_grammars()
 
 commands = MappingRule(
     mapping={
@@ -106,7 +138,7 @@ commands = MappingRule(
         "reload configurations": Function(reload_configurations)
 
     },
-    extras=[Choice("g", dict((g.name, g) for g in filter(lambda g: g is not None, loaded_modules.values())))]
+    extras=[loaded_grammars_ref]
 )
 
 grammar = Grammar("Dynamic manager")
@@ -115,9 +147,10 @@ grammar.load()
 
 
 def unload():
+    unload_grammars()
+    unload_modules()
+
     global grammar
     if grammar:
         grammar.unload()
     grammar = None
-
-    unload_modules()
