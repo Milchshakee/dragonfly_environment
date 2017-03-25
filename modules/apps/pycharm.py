@@ -59,7 +59,10 @@ mapping = {
     "close tab": Key("c-f4"),
 
     # Version control.
-    "show diff": Key("c-d"),
+    "git commit": Key("c-k"),
+    "git update": Key("c-t"),
+    "git add": Key("ca-a"),
+    "git push": Key("cs-k"),
 
     # Refactoring.
     "(refactor|re-factor) (this|choose)": Key("cas-t"),
@@ -76,8 +79,10 @@ mapping = {
     "(refactor|re-factor) extract method": Key("ca-m"),
     "(refactor|re-factor) (in line|inline)": Key("ca-n"),
 
-	"next word": Key("c-right"),
-	"previous word": Key("c-left"),
+    "complete": Key("c-space"),
+    "option <n>": Key("down/3:%(n)d, up/3, enter"),
+    "hide": Key("s-escape"),
+
 }
 
 

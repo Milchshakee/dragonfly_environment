@@ -1,32 +1,32 @@
 from dragonfly import *
 
-import modules.util.formatter
+import modules.util.formatter as formatter
 
 DYN_MODULE_NAME = "python"
 
 
 def define_variable(text):
-    modules.util.formatter.snake_case_text(text)
+    formatter.snake_case_text(text)
     Text(" = ").execute()
 
 
 def define_function(text):
     Text("def ").execute()
-    modules.util.formatter.snake_case_text(text)
+    formatter.snake_case_text(text)
     Text("():").execute()
     Key("left:2").execute()
 
 
 def define_method(text):
     Text("def ").execute()
-    modules.util.formatter.snake_case_text(text)
+    formatter.snake_case_text(text)
     Text("(self, ):").execute()
     Key("left:2").execute()
 
 
 def define_class(text):
     Text("class ").execute()
-    modules.util.formatter.pascal_case_text(text)
+    formatter.pascal_case_text(text)
     Text("():").execute()
     Key("left:2").execute()
 
@@ -48,11 +48,12 @@ rules = MappingRule(
         "(def|define|definition) function <text>": Function(define_function),
         "(def|define|definition) method <text>": Function(define_method),
         "(def|define|definition) init": Text("def __init__("),
-        "(def|define|definition) string": Text("\"\"") + Key("left"),
+        "string": Text("\"\"") + Key("left"),
+        "string <text>": Text("\"%(text)s\""),
         "[(def|define)] (var|variable) <text> equals": Function(define_variable),
         "(def|define|definition) class <text>": Function(define_class),
-        "(var|variable) <text>": Function(modules.util.formatter.snake_case_text),
-        "class <text>": Function(modules.util.formatter.pascal_case_text),
+        "(var|variable) <text>": Function(formatter.snake_case_text),
+        "class <text>": Function(formatter.pascal_case_text),
         "doc string": Text('"""Doc string."""') + Key("left:14, s-right:11"),
         "else": Text("else:") + Key("enter"),
         "except": Text("except "),
@@ -99,7 +100,13 @@ rules = MappingRule(
         "while": Text("while "),
         "yield": Text("yield "),
 
-        "end (params|parameters)": Key("right:2"),
+        "start block": Text(":") + Key("enter"),
+        "end (params|parameters)": Key("right") + Text(":") + Key("enter"),
+        "next (arg|argument)": Text(", "),
+        "call empty function <text>": Text(".") + Function(formatter.snake_case_text) + Text("()"),
+        "call function <text>": Text(".") + Function(formatter.snake_case_text) + Text("()") + Key("left"),
+        "create empty <text>": Function(formatter.pascal_case_text) + Text("()"),
+        "create <text>": Function(formatter.pascal_case_text) + Text("()") + Key("left"),
 
         # Some common modules.
         "datetime": Text("datetime"),

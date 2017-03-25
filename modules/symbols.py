@@ -57,33 +57,48 @@ class RareSymbolRule(CompoundRule):
 
 
 letter_map = {
-    "(A|alpha)": ("a", "A"),
-    "(B|bravo) ": ("b", "B"),
-    "(C|charlie) ": ("c", "C"),
-    "(D|delta) ": ("d", "D"),
-    "(E|echo) ": ("e", "E"),
-    "(F|foxtrot) ": ("f", "F"),
-    "(G|golf) ": ("g", "G"),
-    "(H|hotel) ": ("h", "H"),
-    "(I|india|indigo) ": ("i", "I"),
-    "(J|juliet) ": ("j", "J"),
-    "(K|kilo) ": ("k", "K"),
-    "(L|lima) ": ("l", "L"),
-    "(M|mike) ": ("m", "M"),
-    "(N|november) ": ("n", "N"),
-    "(O|oscar) ": ("o", "O"),
-    "(P|papa|poppa) ": ("p", "P"),
-    "(Q|quebec|quiche) ": ("q", "Q"),
-    "(R|romeo) ": ("r", "R"),
-    "(S|sierra) ": ("s", "S"),
-    "(T|tango) ": ("t", "T"),
-    "(U|uniform) ": ("u", "U"),
-    "(V|victor) ": ("v", "V"),
-    "(W|whiskey) ": ("w", "W"),
-    "(X|x-ray) ": ("x", "X"),
-    "(Y|yankee) ": ("y", "Y"),
-    "(Z|zulu) ": ("z", "Z")
+    "(alpha)": ("a", "A"),
+    "(bravo) ": ("b", "B"),
+    "(charlie) ": ("c", "C"),
+    "(delta) ": ("d", "D"),
+    "(echo) ": ("e", "E"),
+    "(foxtrot) ": ("f", "F"),
+    "(golf) ": ("g", "G"),
+    "(hotel) ": ("h", "H"),
+    "(india|indigo) ": ("i", "I"),
+    "(juliet) ": ("j", "J"),
+    "(kilo) ": ("k", "K"),
+    "(lima) ": ("l", "L"),
+    "(mike) ": ("m", "M"),
+    "(November) ": ("n", "N"),
+    "(oscar) ": ("o", "O"),
+    "(papa|poppa) ": ("p", "P"),
+    "(Quebec|quiche) ": ("q", "Q"),
+    "(romeo) ": ("r", "R"),
+    "(sierra) ": ("s", "S"),
+    "(tango) ": ("t", "T"),
+    "(uniform) ": ("u", "U"),
+    "(victor) ": ("v", "V"),
+    "(whiskey) ": ("w", "W"),
+    "(x-ray) ": ("x", "X"),
+    "(yankee) ": ("y", "Y"),
+    "(Zulu) ": ("z", "Z")
 }
+
+all_symbols = {}
+for key, value in letter_map.iteritems():
+    all_symbols[key] = letter_map[key][0]
+    all_symbols["(cap|capital) " + key] = letter_map[key][1]
+all_symbols.update(common_symbols)
+all_symbols.update(rare_symbols)
+
+
+class SpellRule(CompoundRule):
+    spec = "spell <symbols>"
+    extras = [Repetition(name="symbols", child=Choice("symbols", all_symbols), max=20)]
+
+    def _process_recognition(self, node, extras):
+        Text(reduce(lambda x,y: x + y, extras["symbols"])).execute()
 
 
 class LetterRule(CompoundRule):
@@ -98,7 +113,7 @@ class LetterRule(CompoundRule):
 
 class CapitalLetterRule(CompoundRule):
 
-    spec = "capital letter <letter>"
+    spec = "(cap|capital) letter <letter>"
     extras = [Choice("letter", letter_map)]
 
     def _process_recognition(self, node, extras):
@@ -123,6 +138,7 @@ class NumberRule(CompoundRule):
 
 def create_grammar():
     grammar = Grammar("symbols")
+    grammar.add_rule(SpellRule())
     grammar.add_rule(CommonSymbolRule())
     grammar.add_rule(RareSymbolRule())
     grammar.add_rule(LetterRule())

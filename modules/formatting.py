@@ -38,7 +38,6 @@ formatMap = {
 }
 
 command_map = {
-    "underscore [<n>]": Key("underscore/2:%(n)d"),
     "camel case <n> [words]": Function(camel_case_count),
     "pascal case <n> [words]": Function(pascal_case_count),
     "snake case <n> [words]": Function(snake_case_count),

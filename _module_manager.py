@@ -119,11 +119,32 @@ def disable_grammar(g):
 
 
 def reload_configurations():
-    print("\nLoading configurations:")
+    print("\nReloading configurations:")
     for module in loaded_modules:
         if "reload_config" in module.__dict__:
-            module.reload_config()
-            print(" - %s" % module.__name__)
+            try:
+                module.reload_config()
+                print(" - %s" % module.__name__)
+            except:
+                print("Could not reload configuration of %s:" % module.__name__)
+                print(traceback.format_exc())
+                continue
+
+
+def reload_modules():
+    enabled_grammar_names = [name for name, g in loaded_grammars.iteritems() if g.enabled]
+
+    unload_grammars()
+    unload_modules()
+    load_modules()
+    reload_configurations()
+    load_grammars()
+    
+    for grammar_name in enabled_grammar_names:
+        if loaded_grammars.has_key(grammar_name):
+            g = loaded_grammars[grammar_name]
+            if not g.enabled:
+                enable_grammar(g)
 
 
 load_modules()
@@ -132,7 +153,7 @@ load_grammars()
 
 commands = MappingRule(
     mapping={
-        "reload modules": Function(unload_modules) + Function(load_modules),
+        "reload modules": Function(reload_modules),
         "enable <g> grammar": Function(enable_grammar),
         "disable <g> grammar": Function(disable_grammar),
         "reload configurations": Function(reload_configurations)
