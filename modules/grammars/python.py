@@ -36,7 +36,7 @@ rules = MappingRule(
         # Commands and keywords:
         "and": Text(" and "),
         "as": Text("as "),
-        "assign": Text(" = "),
+        "assign": Key("end") + Text(" = "),
         "assert": Text("assert "),
         "break": Text("break"),
         "comment": Text("# "),
@@ -47,7 +47,7 @@ rules = MappingRule(
         "enumerate": Text("enumerate()") + Key("left"),
         "(def|define|definition) function <text>": Function(define_function),
         "(def|define|definition) method <text>": Function(define_method),
-        "(def|define|definition) init": Text("def __init__("),
+        "(def|define|definition) constructor": Text("def __init__()") + Key("left"),
         "string": Text("\"\"") + Key("left"),
         "string <text>": Text("\"%(text)s\""),
         "[(def|define)] (var|variable) <text> equals": Function(define_variable),

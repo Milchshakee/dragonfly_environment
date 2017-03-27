@@ -23,6 +23,14 @@ common_symbols = {
     "space": " ",
     "[double] quote": '"',
     "single quote": "'",
+    "open paren": "(",
+    "close paren": ")",
+    "open bracket": "[",
+    "close bracket": "]",
+    "open angle bracket": "<",
+    "close angle bracket": ">",
+    "open brace": "{",
+    "close brace": "}",
 }
 
 

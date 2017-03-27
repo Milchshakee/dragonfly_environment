@@ -53,7 +53,9 @@ class ActionRule(CompoundRule):
         Pause("3")
         action.execute()
 
-commands = {
+data = {
+    "go to start": Key("c-a/3, left"),
+    "go to end": Key("c-a/3, right"),
     "up [<n>]": Key("up:%(n)d"),
     "down [<n>]": Key("down:%(n)d"),
     "left [<n>]": Key("left:%(n)d"),
@@ -69,8 +71,10 @@ commands = {
     "space [<n>]": release + Key("space:%(n)d"),
     "enter [<n>]": release + Key("enter:%(n)d"),
     "tab [<n>]": Key("tab:%(n)d"),
-    "delete <n>": Key("del/3:%(n)d"),
-    "(back|backspace) [<n>]": release + Key("backspace/1:%(n)d"),
+    "delete <n>": Function(stop_marking) + Key("del/3:%(n)d"),
+    "delete here <n>": Mouse("left") + Function(stop_marking) + Key("del/3:%(n)d"),
+    "(back|backspace) [<n>]": Key("backspace/1:%(n)d"),
+    "(back|backspace) here [<n>]": Mouse("left") + Key("backspace/1:%(n)d"),
     "application key": release + Key("apps/3"),
     "win key": release + Key("win/3"),
     "paste": Function(paste_command),
@@ -78,8 +82,11 @@ commands = {
     "select": Mouse("left/3, left/3"),
     "select line": Mouse("left/3, left/3, left/3"),
     "select all": Key("c-a/3"),
-    "indent [<n>]": Key("tab:%(n)d"),
-    "unindent [<n>]": Key("shift:down/3, tab/3:%(n)d, shift:up/3"),
+    "indent [<n>]": Function(stop_marking) + Key("tab:%(n)d"),
+    "unindent [<n>]": Function(stop_marking) + Key("shift:down/3, tab/3:%(n)d, shift:up/3"),
+    "new line [<n>]": Key("end/3, enter/3:%(n)d"),
+    "new line here [<n>]": Mouse("left") + Key("end/3, enter/3:%(n)d"),
+
 
     "undo": release + Key("c-z/3"),
     "undo <n> [times]": release + Key("c-z/3:%(n)d"),
@@ -101,7 +108,7 @@ commands = {
 
 
 class KeystrokeRule(MappingRule):
-    mapping = commands
+    mapping = data
     extras = [
         IntegerRef("n", 1, 100)
     ]

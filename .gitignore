@@ -20,4 +20,7 @@ develop-eggs
 # Ignore Natlink files
 core/
 
-config.json
+config/programs.json
+config/monitors.json
+config/special_words.json
+config/mouse.json

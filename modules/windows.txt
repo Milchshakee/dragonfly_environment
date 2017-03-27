@@ -1,4 +1,0 @@
-names.monitor_names = {
-    'Main': 0,
-	'Side': 1
-}
