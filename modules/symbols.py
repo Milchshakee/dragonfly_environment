@@ -50,7 +50,8 @@ rare_symbols = {
     "and": "&",
     "equal": "=",
     "plus": "+",
-    "(bar|vertical bar|pipe)": "|"
+    "(bar|vertical bar|pipe)": "|",
+    "caret": "^"
 }
 
 

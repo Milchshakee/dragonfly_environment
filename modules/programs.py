@@ -50,8 +50,12 @@ class ParameterRule(CompoundRule):
             spec = "set " + parameter["name"] + " <value>"
             extras = [Dictation("value")]
         if parameter["type"] == "alternative":
+            values = parameter["values"]
+            if isinstance(values, dict):
+                extras = [Choice("value", values)]
+            if isinstance(values, list):
+                extras = [Alternative(name="value", children=[Compound(spec=word, value=word) for word in values])]
             spec = "set " + parameter["name"] + " <value>"
-            extras = [Alternative(name="value", children=[Compound(spec=word, value=word) for word in parameter["values"]])]
         if parameter["type"] == "switch-enable":
             spec = "enable " + parameter["name"]
         if parameter["type"] == "switch-disable":

@@ -36,7 +36,7 @@ rules = MappingRule(
         # Commands and keywords:
         "and": Text(" and "),
         "as": Text("as "),
-        "assign": Key("end") + Text(" = "),
+        "assign": Text(" = "),
         "assert": Text("assert "),
         "break": Text("break"),
         "comment": Text("# "),
@@ -53,6 +53,9 @@ rules = MappingRule(
         "[(def|define)] (var|variable) <text> equals": Function(define_variable),
         "(def|define|definition) class <text>": Function(define_class),
         "(var|variable) <text>": Function(formatter.snake_case_text),
+        "(arg|argument) <text>": Function(formatter.snake_case_text) + Text("="),
+        "private <text>": Text("__") + Function(formatter.snake_case_text),
+        "protected <text>": Text("_") + Function(formatter.snake_case_text),
         "class <text>": Function(formatter.pascal_case_text),
         "doc string": Text('"""Doc string."""') + Key("left:14, s-right:11"),
         "else": Text("else:") + Key("enter"),
