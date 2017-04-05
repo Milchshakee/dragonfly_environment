@@ -1,0 +1,87 @@
+{
+    "name": "git",
+    "path": "git",
+    "configurations": [
+        {
+            "name": "add",
+            "args": "add",
+            "params": [
+                {
+                    "name": "files",
+                    "type": "dictation",
+                    "format": "<value>"
+                },
+
+                {
+                    "name": "verbose",
+                    "type": "switch",
+                    "value": "--verbose"
+                },
+                {
+                    "name": "dry run",
+                    "type": "switch",
+                    "value": "--dry-run"
+                },
+                {
+                    "name": "force",
+                    "type": "switch",
+                    "value": "--force"
+                },
+                {
+                    "name": "interactive",
+                    "type": "switch",
+                    "value": "--interactive"
+                },
+                {
+                    "name": "patch",
+                    "type": "switch",
+                    "value": "--patch"
+                },
+                {
+                    "name": "edit",
+                    "type": "switch",
+                    "value": "--edit"
+                },
+                {
+                    "name": "all",
+                    "type": "switch",
+                    "value": "--all"
+                },
+                {
+                    "name": "no all",
+                    "type": "switch",
+                    "value": "--no-all"
+                },
+                {
+                    "name": "intent to add",
+                    "type": "switch",
+                    "value": "--intent-to-add"
+                },
+                {
+                    "name": "refresh",
+                    "type": "switch",
+                    "value": "--refresh"
+                },
+                {
+                    "name": "ignore errors",
+                    "type": "switch",
+                    "value": "--ignore-errors"
+                },
+                {
+                    "name": "ignore missing",
+                    "type": "switch",
+                    "value": "--ignore-missing"
+                },
+                {
+                    "name": "executable bit",
+                    "type": "alternative",
+                    "values": {
+                        "true": "+",
+                        "false": "-"
+                    },
+                    "format": "--chmod=<value>x"
+                }
+            ]
+        }
+    ]
+}
