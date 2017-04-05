@@ -2,8 +2,6 @@ from dragonfly import *
 
 import modules.util.formatter
 
-DYN_MODULE_NAME = "java"
-
 
 def define_function(text):
     Text("function ").execute()

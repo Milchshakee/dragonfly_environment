@@ -1,17 +1,10 @@
-"""A command module for Dragonfly, for generic editing help.
-
------------------------------------------------------------------------------
-This is a heavily modified version of the _multiedit-en.py script at:
-http://dragonfly-modules.googlecode.com/svn/trunk/command-modules/documentation/mod-_multiedit.html  # @IgnorePep8
-Licensed under the LGPL, see http://www.gnu.org/licenses/
-
-"""
 from dragonfly import *
 from dragonfly.actions.keyboard import keyboard
 from dragonfly.actions.typeables import typeables
+from modules.util.dragonfly_utils import PositionalText, SurroundRule
 
 common_symbols = {
-    "(dash|minus|hyphen)": "-",
+    "(dash)": "-",
     "(dot|period)": ".",
     "comma": ",",
     "backslash": "\\",
@@ -31,15 +24,18 @@ common_symbols = {
     "close angle bracket": ">",
     "open brace": "{",
     "close brace": "}",
+    "tab": "    "
 }
 
 
-class CommonSymbolRule(MappingRule):
-
-    mapping = common_symbols
-
-    def _process_recognition(self, node, extras):
-        Text(node).execute()
+surroundings = {
+    "angle brackets": ("<", ">"),
+    "brackets": ("[", "]"),
+    "braces": ("{", "}"),
+    "parens": ("(", ")"),
+    "[double] quotes": ("\"", "\""),
+    "single quotes": ("'", "'"),
+}
 
 
 rare_symbols = {
@@ -53,16 +49,6 @@ rare_symbols = {
     "(bar|vertical bar|pipe)": "|",
     "caret": "^"
 }
-
-
-class RareSymbolRule(CompoundRule):
-
-    spec = "<symbol> (sign|symbol)"
-    extras = [Choice("symbol", rare_symbols)]
-
-    def _process_recognition(self, node, extras):
-        symbol = extras["symbol"]
-        Text(symbol).execute()
 
 
 letter_map = {
@@ -102,12 +88,31 @@ all_symbols.update(common_symbols)
 all_symbols.update(rare_symbols)
 
 
+class CommonSymbolRule(MappingRule):
+
+    mapping = common_symbols
+
+    def _process_recognition(self, node, extras):
+        PositionalText(node).execute()
+
+
+
+class RareSymbolRule(CompoundRule):
+
+    spec = "<symbol> (sign|symbol)"
+    extras = [Choice("symbol", rare_symbols)]
+
+    def _process_recognition(self, node, extras):
+        symbol = extras["symbol"]
+        PositionalText(symbol).execute()
+
+
 class SpellRule(CompoundRule):
     spec = "spell <symbols>"
     extras = [Repetition(name="symbols", child=Choice("symbols", all_symbols), max=20)]
 
     def _process_recognition(self, node, extras):
-        Text(reduce(lambda x,y: x + y, extras["symbols"])).execute()
+        PositionalText(reduce(lambda x, y: x + y, extras["symbols"])).execute()
 
 
 class LetterRule(CompoundRule):
@@ -117,7 +122,7 @@ class LetterRule(CompoundRule):
 
     def _process_recognition(self, node, extras):
         letter = extras["letter"][0]
-        Text(letter).execute()
+        PositionalText(letter).execute()
 
 
 class CapitalLetterRule(CompoundRule):
@@ -127,7 +132,7 @@ class CapitalLetterRule(CompoundRule):
 
     def _process_recognition(self, node, extras):
         letter = extras["letter"][1]
-        Text(letter).execute()
+        PositionalText(letter).execute()
 
 
 class NumberRule(CompoundRule):
@@ -142,11 +147,13 @@ class NumberRule(CompoundRule):
             floating_point = extras["n"]
             number += "." + str(floating_point)
 
-        Text(number).execute()
+        PositionalText(number).execute()
 
 
 def create_grammar():
     grammar = Grammar("symbols")
+    for key, value in surroundings.iteritems():
+        grammar.add_rule(SurroundRule(key, value[0], value[1]))
     grammar.add_rule(SpellRule())
     grammar.add_rule(CommonSymbolRule())
     grammar.add_rule(RareSymbolRule())

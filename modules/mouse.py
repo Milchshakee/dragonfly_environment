@@ -2,33 +2,9 @@ import win32api, win32con
 import dragonfly.timer
 from dragonfly import *
 
-
 scroll_position = None
 scrolling = False
-marking = False
 
-
-def start_marking():
-    global marking
-    marking = True
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    Key("shift:down").execute()
-
-
-def stop_marking():
-    global marking
-    if marking:
-        marking = False
-        Key("shift:up").execute()
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-
-
-def toggle_marking():
-    global marking
-    if marking:
-        stop_marking()
-    else:
-        start_marking()
 
 SCROLL_THRESHOLD = 3
 SCROLL_SPEED = 0.003
@@ -64,9 +40,8 @@ def toggle_scroll():
 class MouseRule(MappingRule):
     mapping = {
         "scroll": Function(toggle_scroll),
-        "mark": Function(toggle_marking),
         "(left-click|click)": Mouse("left"),
-        "double-click": Mouse("left/3, left/3"),
+        "(double-click|double|open|select)": Mouse("left/3, left/3"),
         "right-click": Mouse("right")
     }
 

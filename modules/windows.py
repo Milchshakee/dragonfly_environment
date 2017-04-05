@@ -66,7 +66,7 @@ default_monitors_file = """{
 """
 
 
-def reload_config(config_path):
+def load_config(config_path):
     monitors_file = os.path.join(config_path, "monitors.json")
     for key, value in parse_file(monitors_file, default_monitors_file)["monitor_names"].iteritems():
         monitor_names[key] = monitors[value]
@@ -78,7 +78,7 @@ def reload_config(config_path):
 def create_grammar():
     class WinSelectorRule(CompoundRule):
 
-        spec = "window | win | [window] <window_name>"
+        spec = "window | win | window <window_name>"
         extras = [Choice("window_name", window_names)]
         exported = False
 

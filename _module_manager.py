@@ -120,18 +120,24 @@ def disable_grammar(g):
         print("Grammar %s disabled" % g.name)
 
 
-def reload_configurations():
-    config_path = os.path.join(os.path.dirname(__file__), "config")
-    print("\nReloading configurations:")
+def call_function(name, **kwargs):
     for module in loaded_modules:
-        if "reload_config" in module.__dict__:
+        if name in module.__dict__:
             try:
-                module.reload_config(config_path)
+                function = getattr(module, name)
+                function(**kwargs)
                 print(" - %s" % module.__name__)
             except:
-                print("Could not reload configuration of %s:" % module.__name__)
+                print("Could not call function %s of %s:" % (name, module.__name__))
                 print(traceback.format_exc())
                 continue
+
+
+def load_configurations():
+    print("\nLoading configurations:")
+    config_path = os.path.join(os.path.dirname(__file__), "config")
+    call_function("load_config", config_path=config_path)
+    call_function("post_config")
 
 
 def reload_data():
@@ -140,7 +146,7 @@ def reload_data():
     unload_grammars()
     unload_modules()
     load_modules()
-    reload_configurations()
+    load_configurations()
     load_grammars()
 
     for grammar_name in enabled_grammar_names:
@@ -151,7 +157,7 @@ def reload_data():
 
 
 load_modules()
-reload_configurations()
+load_configurations()
 load_grammars()
 
 data = MappingRule(

@@ -1,8 +1,11 @@
 import os
+
+from modules.util.dragonfly_utils import get_unique_rule_name
+from modules.util.utils import shell_context, write_to_shell
 from modules.util.json_parser import parse_file
 from dragonfly import (Grammar, Choice, RuleRef, DictListRef,
                        Dictation, Compound, Rule, CompoundRule,
-                       DictList, Alternative)
+                       Key, Alternative)
 
 data = []
 rules = []
@@ -42,7 +45,7 @@ class CommandRule(CompoundRule):
 
 class ParameterRule(CompoundRule):
 
-    def __init__(self, command_name, configuration_name, parameter):
+    def __init__(self, parameter):
         self.__parameter = parameter
         spec = None
         extras = []
@@ -56,13 +59,11 @@ class ParameterRule(CompoundRule):
             if isinstance(values, list):
                 extras = [Alternative(name="value", children=[Compound(spec=word, value=word) for word in values])]
             spec = "set " + parameter["name"] + " <value>"
-        if parameter["type"] == "switch-enable":
+        if parameter["type"] == "switch":
             spec = "enable " + parameter["name"]
-        if parameter["type"] == "switch-disable":
-            spec = "disable " + parameter["name"]
 
         CompoundRule.__init__(self,
-                              name=command_name + "." + configuration_name + "." + parameter["name"],
+                              name=get_unique_rule_name(),
                               spec=spec,
                               extras=extras)
 
@@ -81,23 +82,25 @@ class ParameterRule(CompoundRule):
 
 class ExecuteRule(CompoundRule):
 
-    spec = "execute command"
+    spec = "(write|execute) command"
 
     def _process_recognition(self, node, extras):
         global active_executable
         global active_configuration
-        if active_executable is None:
+        if active_configuration is None:
             print("No command to execute")
             return
         if len(required_parameters) > 0:
-            print("Missing required parameters: " + required_parameters)
+            print("Missing required parameters: " + str(required_parameters))
             return
 
         command = active_executable + " " + active_configuration["args"]
         for value in parameters_values.itervalues():
             if value is not None:
                 command += " " + value
-        print(command)
+        write_to_shell(command)
+        if "execute" in node.words():
+            Key("enter").execute()
 
         global active_parameter_rules
         for rule in active_parameter_rules:
@@ -106,36 +109,36 @@ class ExecuteRule(CompoundRule):
         active_executable = None
         active_configuration = None
 
-default_programs_file = """{
-    "special_words": ["word1", "some text", "etc"]
-}
-"""
+
+def load_file(command_file):
+    command = parse_file(command_file)
+    if "configurations" not in command:
+        default_configuration = {"name": "default", "args": None, "params": []}
+        command["configurations"] = [default_configuration]
+    else:
+        for configuration in command["configurations"]:
+            if "args" not in configuration:
+                configuration["args"] = None
+            if "params" not in configuration:
+                configuration["params"] = []
+            else:
+                for parameter in configuration["params"]:
+                    if "required" not in parameter:
+                        parameter["required"] = False
+                    if "default" not in parameter:
+                        parameter["default"] = None
+    data.append(command)
 
 
-def reload_config(config_path):
-    programs_file = os.path.join(config_path, "programs.json")
-    global data
-    data = parse_file(programs_file, default_programs_file)["commands"]
-    for command in data:
-        if not command.has_key("configurations"):
-            default_configuration = {"name": "default", "args": None, "params": []}
-            command["configurations"] = [default_configuration]
-        else:
-            for configuration in command["configurations"]:
-                if "args" not in configuration:
-                    configuration["args"] = None
-                if "params" not in configuration:
-                    configuration["params"] = []
-                else:
-                    for parameter in configuration["params"]:
-                        if "required" not in parameter:
-                            parameter["required"] = False
-                        if "default" not in parameter:
-                            parameter["default"] = None
+def load_config(config_path):
+    commands_directory = os.path.join(config_path, "commands")
+    for dirname, _, filenames in os.walk(commands_directory):
+        for filename in filenames:
+            load_file(os.path.join(dirname, filename))
 
 
 def create_grammar():
-    grammar = Grammar("program")
+    grammar = Grammar("commands", shell_context)
 
     for command in data:
         for configuration in command["configurations"]:
@@ -143,7 +146,7 @@ def create_grammar():
             parameters_rules = []
             for parameter in configuration["params"]:
                 default_parameters[parameter["name"]] = parameter["default"]
-                rule = ParameterRule(command["name"], configuration["name"], parameter)
+                rule = ParameterRule(parameter)
                 grammar.add_rule(rule)
                 rule.disable()
                 parameters_rules.append(rule)

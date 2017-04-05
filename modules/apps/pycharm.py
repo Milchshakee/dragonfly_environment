@@ -3,6 +3,7 @@ from dragonfly import *
 import modules.util.formatter
 
 mapping = {
+    "import this": Mouse("left") + Key("a-enter"),
     # Code execution.
     "run app": Key("s-f10"),
     "re-run app": Key("c-f5"),
@@ -10,20 +11,11 @@ mapping = {
     "stop running": Key("c-f2"),
 
     # Code navigation.
-    "navigate to class <text>": Key("c-n") + Pause("30") + Function(modules.util.formatter.pascal_case_text) + Pause("30") + Key("enter"),
-    "navigate to class chooser <text>": Key("c-n") + Pause("30") + Function(
-        modules.util.formatter.pascal_case_text) + Pause("30"),
-    "navigate to file <text>": Key("cs-n") + Pause("30") + Function(modules.util.formatter.camel_case_text) + Pause("30") + Key("enter"),
-    "navigate to file chooser <text>": Key("cs-n") + Pause("30") + Function(
-        modules.util.formatter.camel_case_text) + Pause("30"),
-    "navigate to symbol <text>": Key("cas-n") + Pause("30") + Function(modules.util.formatter.camel_case_text) + Pause("30") + Key("enter"),
-    "navigate to symbol chooser <text>": Key("cas-n") + Pause("30") + Function(
-        modules.util.formatter.camel_case_text) + Pause("30"),
-    "go to declaration": Key("c-b"),
-    "go to implementation": Key("ca-b"),
-    "go to super": Key("c-u"),
-    "go to (class|test)": Key("cs-t"),
-    "go back": Key("ca-left"),
+    "go to declaration": Mouse("left") + Key("c-b"),
+    "go to implementation": Mouse("left") + Key("ca-b"),
+    "go to super": Mouse("left") + Key("c-u"),
+    "go to (class|test)": Mouse("left") + Key("cs-t"),
+    "go back": Mouse("left") + Key("ca-left"),
 
     # Project settings.
     "go to project window": Key("a-1"),
@@ -37,14 +29,14 @@ mapping = {
     # Search.
     "find text": Key("c-f"),
     "find in path": Key("cs-f"),
-    "find usages": Key("a-f7"),
+    "find usages": Mouse("left") + Key("a-f7"),
     "replace text": Key("c-r"),
 
     # Edit.
-    "save [file|all]": Key("c-s"),
+    "(save|safe) [file|all]": Key("c-s"),
 
     # Code.
-    "show intentions": Key("a-enter"),
+    "show intentions": Mouse("left") + Key("a-enter"),
     "accept choice": Key("c-enter"),
     "go to line": Key("c-g"),
     "go to line <n>": Key("c-g/25") + Text("%(n)d") + Key("enter"),
@@ -81,8 +73,8 @@ mapping = {
 
     "complete": Key("c-space"),
     "option <n>": Key("down/3:%(n)d, up/3, enter"),
-    "hide": Key("s-escape"),
-
+    "hide window": Mouse("left") + Key("s-escape"),
+    "close search bar": Key("escape"),
 }
 
 
