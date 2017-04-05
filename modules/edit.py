@@ -52,7 +52,10 @@ scopes = {
     "this": Mouse("left/3, left/3"),
     "string": Function(select_string, include_quotes=True),
     "string content": Function(select_string, include_quotes=False),
-    "letter": Mouse("left/3") + Key("s-right/3")
+    "letter": Mouse("left/3") + Key("s-right/3"),
+    "left": Mouse("left/3") + Key("s-home"),
+    "right": Mouse("left/3") + Key("s-end")
+
 }
 
 
@@ -83,7 +86,7 @@ def remove_mark_or_update_cursor():
         global_state.stop_marking()
     elif global_state.is_something_marked:
         global_state.is_something_marked = False
-    else:
+    elif global_state.get_complete_nesting_level() == 0:
         global_state.update_cursor()
 
 
@@ -113,6 +116,7 @@ def unindent(n):
     Key("shift:up/3").execute()
 
 normal_data = {
+    "select": scopes["this"] + actions["select"][0],
     "delete <n>": Function(remove_mark_or_update_cursor) + Key("del/3:%(n)d"),
     "(back|backspace) [<n>]": Function(remove_mark_or_update_cursor) + Key("backspace/1:%(n)d"),
     "paste": Function(remove_mark_or_update_cursor) + Key("c-v/3"),

@@ -121,6 +121,13 @@ def ternary():
     global_state.add_nesting_level(4)
 
 
+def list_comprehension():
+    PositionalText("[ for  in ]").execute()
+    global_state.add_nesting_level(1)
+    global_state.add_nesting_level(4)
+    global_state.add_nesting_level(5)
+
+
 def format_variable(text, prefix="", suffix=""):
     name = formatter.format_text(text, formatter.FormatType.snakeCase)
     PositionalText(prefix + name + suffix).execute()
@@ -173,6 +180,7 @@ rules = MappingRule(
         "lambda": PositionalText("lambda "),
         "less than": PositionalText(" < "),
         "less [than] equals": PositionalText(" <= "),
+        "list comprehension": Function(list_comprehension),
         "(minus|subtract|subtraction)": PositionalText(" - "),
         "(minus|subtract|subtraction) equals": PositionalText(" -= "),
         "modulo": PositionalText(" % "),
@@ -195,11 +203,10 @@ rules = MappingRule(
         "while": PositionalText("while "),
         "yield": PositionalText("yield "),
 
-        "start block": Function(global_state.remove_nesting_levels) + PositionalText(":\n"),
+        "start block": Function(global_state.clear_nesting_levels) + Key("end") + PositionalText(":\n"),
+        "new entry": Function(global_state.clear_nesting_levels) + Key("end") + PositionalText(",\n"),
         "next [(arg|argument)]": Function(global_state.remove_nesting_levels) + PositionalText(", "),
         "value": Function(global_state.remove_nesting_levels) + PositionalText(": "),
-        "new entry": Function(global_state.remove_nesting_levels) + PositionalText(",\n"),
-
 
         # Some common modules.
         "datetime": PositionalText("datetime"),

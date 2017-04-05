@@ -77,6 +77,6 @@ class PositionalText(Text):
                 stop_marking()
             elif global_state.is_something_marked:
                 global_state.is_something_marked = False
-            else:
+            elif global_state.get_complete_nesting_level() == 0:
                 update_cursor()
             return Text._execute_events(self, events)

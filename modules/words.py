@@ -67,7 +67,13 @@ class PluralRule(MappingRule):
 
 rules = None
 
-default_special_words = {"special_words": ["word1", "some text", "etc"]}
+default_special_words = {
+    "special_words": {
+        "some word": "some word",
+        "some other word": "value"
+    }
+}
+
 
 
 def load_config(config_path):

@@ -60,6 +60,6 @@ def strip_dragon_info(text):
 
         backslash_index = word.find("\\")
         if backslash_index > -1:
-            word = word[:backslash_index]  # Remove spoken form info.
+            word = word[:backslash_index]
         new_words.append(word)
     return new_words
