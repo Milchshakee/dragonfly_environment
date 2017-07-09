@@ -1,6 +1,22 @@
 from dragonfly import *
 
-import modules.util.formatter
+from modules.command_tracker import key, func, text, mouse, sequence
+from modules.util import formatter
+from modules.util.dragonfly_utils import get_selected_text
+
+
+def _change_visibility(prefix):
+    mouse("left/3").execute()
+    key("s-f6/20").execute()
+    name = get_selected_text()
+    if name.startswith("__"):
+        name = name[2:]
+    elif name.startswith("_"):
+        name = name[1:]
+    name = prefix + name
+    text(name).execute()
+    key("enter/3").execute()
+
 
 mapping = {
     "import this": Mouse("left") + Key("a-enter"),
@@ -55,6 +71,8 @@ mapping = {
     "git update": Key("c-t"),
     "git add": Key("ca-a"),
     "git push": Key("cs-k"),
+    "commit": Key("i"),
+    "push": Key("p"),
 
     # Refactoring.
     "(refactor|re-factor) (this|choose)": Key("cas-t"),
@@ -67,14 +85,25 @@ mapping = {
     "(refactor|re-factor) extract constant": Key("ca-c"),
     "(refactor|re-factor) extract field": Key("ca-f"),
     "(refactor|re-factor) extract parameter": Key("ca-p"),
-    "(refactor|re-factor) extract variable": Key("ca-v"),
     "(refactor|re-factor) extract method": Key("ca-m"),
     "(refactor|re-factor) (in line|inline)": Key("ca-n"),
+    "make normal": func(_change_visibility, prefix=""),
+    "make protected": func(_change_visibility, prefix="_"),
+    "make private": func(_change_visibility, prefix="__"),
 
     "complete": Key("c-space"),
+    "only <text>": sequence(func(formatter.format_and_write_text, format_type=formatter.FormatType.snakeCase),
+                                     key("c-space/3")),
+    "first <text>": sequence(func(formatter.format_and_write_text, format_type=formatter.FormatType.snakeCase),
+                                     key("c-space/3, enter/3")),
     "option <n>": Key("down/3:%(n)d, up/3, enter"),
     "hide window": Mouse("left") + Key("s-escape"),
     "close search bar": Key("escape"),
+
+
+    "new file": Mouse("right/3") + Key("down/3, right/3, enter"),
+    "delete file": Mouse("left/3") + Key("delete"),
+    "cancel": Key("escape")
 }
 
 

@@ -1,6 +1,7 @@
 import os
 
-from modules.util.dragonfly_utils import PositionalText, get_unique_rule_name
+from modules.command_tracker import text
+from modules.util.dragonfly_utils import get_unique_rule_name
 from modules.util.json_parser import parse_file
 from dragonfly import Grammar, Alternative, Dictation, Choice, Compound, MappingRule, CompoundRule, RuleRef, Function
 
@@ -20,7 +21,7 @@ class AbbreviationRule(CompoundRule):
         return node.get_child_by_name("abbreviation").value()
 
     def _process_recognition(self, node, extras):
-        PositionalText(self.value(node)).execute()
+        text(self.value(node)).execute()
 
 
 class SpecialWordRule(CompoundRule):
@@ -34,7 +35,7 @@ class SpecialWordRule(CompoundRule):
         return node.get_child_by_name("special_word").value()
 
     def _process_recognition(self, node, extras):
-        PositionalText(self.value(node)).execute()
+        text(self.value(node)).execute()
 
 
 class CapitalizeRule(CompoundRule):
@@ -54,12 +55,12 @@ class CapitalizeRule(CompoundRule):
         return value[0:1].upper() + value[1:]
 
     def _process_recognition(self, node, extras):
-        PositionalText(self.value(node)).execute()
+        text(self.value(node)).execute()
 
 
 class PluralRule(MappingRule):
     mapping = {
-        "plural": PositionalText("s")
+        "plural": text("s")
     }
 
     def __init__(self, exported):
@@ -73,7 +74,6 @@ default_special_words = {
         "some other word": "value"
     }
 }
-
 
 
 def load_config(config_path):

@@ -138,7 +138,7 @@ def load_config(config_path):
 
 
 def create_grammar():
-    grammar = Grammar("commands", shell_context)
+    grammar = Grammar("command line", shell_context)
 
     for command in data:
         for configuration in command["configurations"]:

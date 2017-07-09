@@ -40,7 +40,7 @@ def toggle_scroll():
 class MouseRule(MappingRule):
     mapping = {
         "scroll": Function(toggle_scroll),
-        "(left-click|click)": Mouse("left"),
+        "(left-click|click|focus)": Mouse("left"),
         "(double-click|double|open|select)": Mouse("left/3, left/3"),
         "right-click": Mouse("right")
     }

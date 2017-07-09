@@ -44,7 +44,7 @@ rules = MappingRule(
         "(line end|end line)": Key("end") + Text(";") + Key("enter"),
         "(minus|subtract|subtraction)": Text(" - "),
         "(minus|subtract|subtraction) equals": Text(" -= "),
-        "modulo": Key("space") + Key("percent") + Key("space"),
+        "modulo": Key("space") + Key("%%") + Key("space"),
         "new": Text("new "),
         "not (equal|equals) [to]": Text(" != "),
         "null": Text("null"),

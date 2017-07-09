@@ -1,5 +1,4 @@
 from dragonfly import AppContext, Mouse, Clipboard, Dictation
-import types
 
 shell_context = AppContext(executable="cmd") | AppContext(executable="powershell")
 normal_context = ~shell_context

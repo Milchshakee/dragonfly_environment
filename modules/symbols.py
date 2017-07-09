@@ -1,7 +1,6 @@
 from dragonfly import *
-from dragonfly.actions.keyboard import keyboard
-from dragonfly.actions.typeables import typeables
-from modules.util.dragonfly_utils import PositionalText, SurroundRule
+
+from modules.command_tracker import text, surround_rule, key
 
 common_symbols = {
     "(dash)": "-",
@@ -52,38 +51,38 @@ rare_symbols = {
 
 
 letter_map = {
-    "(alpha)": ("a", "A"),
-    "(bravo) ": ("b", "B"),
-    "(charlie) ": ("c", "C"),
-    "(delta) ": ("d", "D"),
-    "(echo) ": ("e", "E"),
-    "(foxtrot) ": ("f", "F"),
-    "(golf) ": ("g", "G"),
-    "(hotel) ": ("h", "H"),
-    "(india|indigo) ": ("i", "I"),
-    "(juliet) ": ("j", "J"),
-    "(kilo) ": ("k", "K"),
-    "(lima) ": ("l", "L"),
-    "(mike) ": ("m", "M"),
-    "(November) ": ("n", "N"),
-    "(oscar) ": ("o", "O"),
-    "(papa|poppa) ": ("p", "P"),
-    "(Quebec|quiche) ": ("q", "Q"),
-    "(romeo) ": ("r", "R"),
-    "(sierra) ": ("s", "S"),
-    "(tango) ": ("t", "T"),
-    "(uniform) ": ("u", "U"),
-    "(victor) ": ("v", "V"),
-    "(whiskey) ": ("w", "W"),
-    "(x-ray) ": ("x", "X"),
-    "(yankee) ": ("y", "Y"),
-    "(Zulu) ": ("z", "Z")
+    "(a|alpha)": ("a", "A"),
+    "(be|bravo) ": ("b", "B"),
+    "(see|charlie) ": ("c", "C"),
+    "(di|delta) ": ("d", "D"),
+    "(ihh|echo) ": ("e", "E"),
+    "(eff|foxtrot) ": ("f", "F"),
+    "(gee|golf) ": ("g", "G"),
+    "(h|hotel) ": ("h", "H"),
+    "(I|india|indigo) ": ("i", "I"),
+    "(jay|juliet) ": ("j", "J"),
+    "(kay|kilo) ": ("k", "K"),
+    "(ell|lima) ": ("l", "L"),
+    "(em|mike) ": ("m", "M"),
+    "(en|November) ": ("n", "N"),
+    "(oh|oscar) ": ("o", "O"),
+    "(pee|papa|poppa) ": ("p", "P"),
+    "(q|quebec|quiche) ": ("q", "Q"),
+    "(r|romeo) ": ("r", "R"),
+    "(s|sierra) ": ("s", "S"),
+    "(tee|tango) ": ("t", "T"),
+    "(you|uniform) ": ("u", "U"),
+    "(v|victor) ": ("v", "V"),
+    "(w|whiskey) ": ("w", "W"),
+    "(ex|x-ray) ": ("x", "X"),
+    "(why|yankee) ": ("y", "Y"),
+    "(zat|Zulu) ": ("z", "Z")
 }
 
 all_symbols = {}
-for key, value in letter_map.iteritems():
-    all_symbols[key] = letter_map[key][0]
-    all_symbols["(cap|capital) " + key] = letter_map[key][1]
+for k, v in letter_map.iteritems():
+    all_symbols[k] = v[0]
+    all_symbols["(cap|capital) " + k] = v[1]
 all_symbols.update(common_symbols)
 all_symbols.update(rare_symbols)
 
@@ -93,8 +92,7 @@ class CommonSymbolRule(MappingRule):
     mapping = common_symbols
 
     def _process_recognition(self, node, extras):
-        PositionalText(node).execute()
-
+        text(node).execute()
 
 
 class RareSymbolRule(CompoundRule):
@@ -104,7 +102,7 @@ class RareSymbolRule(CompoundRule):
 
     def _process_recognition(self, node, extras):
         symbol = extras["symbol"]
-        PositionalText(symbol).execute()
+        text(symbol).execute()
 
 
 class SpellRule(CompoundRule):
@@ -112,7 +110,7 @@ class SpellRule(CompoundRule):
     extras = [Repetition(name="symbols", child=Choice("symbols", all_symbols), max=20)]
 
     def _process_recognition(self, node, extras):
-        PositionalText(reduce(lambda x, y: x + y, extras["symbols"])).execute()
+        text(reduce(lambda x, y: x + y, extras["symbols"])).execute()
 
 
 class LetterRule(CompoundRule):
@@ -122,7 +120,7 @@ class LetterRule(CompoundRule):
 
     def _process_recognition(self, node, extras):
         letter = extras["letter"][0]
-        PositionalText(letter).execute()
+        text(letter).execute()
 
 
 class CapitalLetterRule(CompoundRule):
@@ -132,7 +130,7 @@ class CapitalLetterRule(CompoundRule):
 
     def _process_recognition(self, node, extras):
         letter = extras["letter"][1]
-        PositionalText(letter).execute()
+        text(letter).execute()
 
 
 class NumberRule(CompoundRule):
@@ -147,13 +145,13 @@ class NumberRule(CompoundRule):
             floating_point = extras["n"]
             number += "." + str(floating_point)
 
-        PositionalText(number).execute()
+        text(number).execute()
 
 
 def create_grammar():
     grammar = Grammar("symbols")
     for key, value in surroundings.iteritems():
-        grammar.add_rule(SurroundRule(key, value[0], value[1]))
+        grammar.add_rule(surround_rule(key, value[0], value[1]))
     grammar.add_rule(SpellRule())
     grammar.add_rule(CommonSymbolRule())
     grammar.add_rule(RareSymbolRule())
@@ -161,8 +159,3 @@ def create_grammar():
     grammar.add_rule(CapitalLetterRule())
     grammar.add_rule(NumberRule())
     return grammar, True
-
-
-def load():
-    if 'semicolon' not in typeables:
-        typeables["semicolon"] = keyboard.get_typeable(char=';')

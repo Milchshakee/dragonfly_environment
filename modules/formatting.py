@@ -1,5 +1,5 @@
 from dragonfly import *
-from util.dragonfly_utils import PositionalText
+import command_tracker
 from modules.util.formatter import format_map, FormatType, format_text
 
 fallback_format = FormatType.spokenForm
@@ -7,7 +7,7 @@ fallback_format = FormatType.spokenForm
 
 def format_input(text, format_type):
     formatted = format_text(text, format_type)
-    PositionalText(formatted).execute()
+    command_tracker.text(formatted).execute()
 
 
 def change_fallback_format(format_type):

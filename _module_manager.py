@@ -80,6 +80,21 @@ def load_grammars():
             print(" - %s" % loaded_grammar.name)
 
 
+def save_module_data():
+    data = {}
+    print("\nSaving module data:")
+    for module in list(loaded_modules):
+        data[module.__name__] = call_function(module, "save_data")
+    return data
+
+
+def load_module_data(data):
+    print("\nLoading module data:")
+    for module in list(loaded_modules):
+        if module.__name__ in data:
+            call_function(module, "load_data", data=data[module.__name__])
+
+
 def unload_modules():
     print("\nUnloading modules:")
     for module in list(loaded_modules):
@@ -120,34 +135,40 @@ def disable_grammar(g):
         print("Grammar %s disabled" % g.name)
 
 
-def call_function(name, **kwargs):
+def call_function(module, name, **kwargs):
+    if name in module.__dict__:
+        try:
+            function = getattr(module, name)
+            returned = function(**kwargs)
+            print(" - %s" % module.__name__)
+            return returned
+        except:
+            print("Could not call function %s of %s:" % (name, module.__name__))
+            print(traceback.format_exc())
+
+
+def call_functions(name, **kwargs):
     for module in loaded_modules:
-        if name in module.__dict__:
-            try:
-                function = getattr(module, name)
-                function(**kwargs)
-                print(" - %s" % module.__name__)
-            except:
-                print("Could not call function %s of %s:" % (name, module.__name__))
-                print(traceback.format_exc())
-                continue
+        call_function(module, name, **kwargs)
 
 
 def load_configurations():
     print("\nLoading configurations:")
     config_path = os.path.join(os.path.dirname(__file__), "config")
-    call_function("load_config", config_path=config_path)
-    call_function("post_config")
+    call_functions("load_config", config_path=config_path)
+    call_functions("post_config")
 
 
 def reload_data():
     enabled_grammar_names = [name for name, g in loaded_grammars.iteritems() if g.enabled]
+    data = save_module_data()
 
     unload_grammars()
     unload_modules()
     load_modules()
     load_configurations()
     load_grammars()
+    load_module_data(data)
 
     for grammar_name in enabled_grammar_names:
         if loaded_grammars.has_key(grammar_name):

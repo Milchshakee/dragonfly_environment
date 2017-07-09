@@ -1,84 +1,120 @@
+from modules.command_tracker import mouse, sequence, key, func, reversible
 from modules.util.dragonfly_utils import get_unique_rule_name
 from modules.util.utils import shell_context, normal_context
-from dragonfly import *
+from dragonfly import Clipboard, CompoundRule, Choice, MappingRule, IntegerRef, Grammar
 import global_state
 
 
 def select_string(include_quotes):
-    Mouse("left/3").execute()
+    mouse("left/3").execute()
     clipboard = Clipboard()
     saved_text = clipboard.get_system_text()
     clipboard.set_system_text('')
     left_counter = 0
     while left_counter < 50:
-        Key("s-left, c-c/3").execute()
+        key("s-left, c-c/3").execute()
         left_counter += 1
         if clipboard.get_system_text().startswith("\""):
             break
 
-    Key("left").execute()
+    key("left").execute()
     move_right = left_counter
     if not include_quotes:
         move_right -= 1
-        Key("right").execute()
-    Key("s-right:%s" % move_right).execute()
+        key("right").execute()
+    key("s-right:%s" % move_right).execute()
 
     right_counter = 0
     while right_counter < 50:
-        Key("s-right, c-c/3").execute()
+        key("s-right, c-c/3").execute()
         right_counter += 1
         if clipboard.get_system_text().endswith("\""):
             break
 
     if not include_quotes:
-        Key("s-left").execute()
+        key("s-left").execute()
 
     clipboard.set_text(saved_text)
     clipboard.copy_to_system()
 
 
-actions = {
-    "cut": (Key("c-x/3"), False),
-    "copy": (Key("c-c/3"), True),
-    "replace": (Key("c-v/3"), False),
-    "delete": (Key("del/3"), False),
-    "select": (Text(""), True),
+def _select():
+    global_state.is_something_marked = True
+
+
+class Action:
+    cut = key("c-x/3")
+    copy = key("c-c/3, left/3")
+    replace = key("c-v/3")
+    delete = key("del/3")
+    select = func(_select)
+
+_actions = {
+    "cut": Action.cut,
+    "copy": Action.copy,
+    "replace": Action.replace,
+    "delete": Action.delete,
+    "select": Action.select,
 }
 
-scopes = {
-    "all": Key("c-a/3"),
-    "line": Mouse("left/3, left/3, left/3"),
-    "line content": Mouse("left/3") + Key("home/3, s-end/3"),
-    "this": Mouse("left/3, left/3"),
-    "string": Function(select_string, include_quotes=True),
-    "string content": Function(select_string, include_quotes=False),
-    "letter": Mouse("left/3") + Key("s-right/3"),
-    "left": Mouse("left/3") + Key("s-home"),
-    "right": Mouse("left/3") + Key("s-end")
 
+class Scope:
+    all = key("c-a/3")
+    line = mouse("left/3, left/3, left/3")
+    line_content = sequence(mouse("left/3"), key("home/3, s-end/3"))
+    this = mouse("left/3, left/3")
+    string = func(select_string, include_quotes=True)
+    string_content = func(select_string, include_quotes=False)
+    letter = sequence(mouse("left/3"), key("s-right/3"))
+    left = sequence(mouse("left/3"), key("s-home/3"))
+    right = sequence(mouse("left/3"), key("s-end/3"))
+
+_scopes = {
+    "all": Scope.all,
+    "line": Scope.line,
+    "line content": Scope.line_content,
+    "this": Scope.this,
+    "string": Scope.string,
+    "string content": Scope.string_content,
+    "letter": Scope.letter,
+    "left": Scope.left,
+    "right": Scope.right
 }
+
+
+def edit(action, scope):
+    if global_state.is_marking:
+        global_state.stop_marking()
+    elif global_state.is_something_marked:
+        global_state.is_something_marked = False
+    elif scope is None:
+        print()
+
+    if scope is not None:
+        scope.execute()
+
+    if action is not None:
+        action.execute()
 
 
 class NormalActionRule(CompoundRule):
     spec = "<action> [<scope>]"
     extras = [
-        Choice("action", actions),
-        Choice("scope", scopes)
+        Choice("action", _actions),
+        Choice("scope", _scopes)
     ]
 
     def _process_recognition(self, node, extras):
-        action, retains_mark = extras["action"]
+        action = extras["action"]
+        scope = None
         if "scope" in extras:
             scope = extras["scope"]
-            scope.execute()
-        else:
-            global_state.stop_marking()
+        edit(action, scope)
 
-        if retains_mark:
-            global_state.is_something_marked = True
 
-        Pause("3").execute()
-        action.execute()
+def update_cursor():
+    if global_state.is_cursor_following_mouse:
+        mouse("left/3").execute()
 
 
 def remove_mark_or_update_cursor():
@@ -87,61 +123,61 @@ def remove_mark_or_update_cursor():
     elif global_state.is_something_marked:
         global_state.is_something_marked = False
     elif global_state.get_complete_nesting_level() == 0:
-        global_state.update_cursor()
+        update_cursor()
 
 
 def indent(n):
     if global_state.is_marking:
         global_state.stop_marking()
-        Key("tab:%s" % n).execute()
+        key("tab:%s" % n).execute()
     elif global_state.is_something_marked:
-        Key("tab:%s" % n).execute()
+        key("tab:%s" % n).execute()
     else:
-        global_state.update_cursor()
-        Key("home, tab:%s" % n).execute()
+        update_cursor()
+        key("home/3, tab:%s" % n).execute()
 
 
 def unindent(n):
-    Key("shift:down/3").execute()
+    key("shift:down/3").execute()
 
     if global_state.is_marking:
         global_state.stop_marking()
-        Key("tab:%s" % n).execute()
+        key("tab:%s" % n).execute()
     elif global_state.is_something_marked:
-        Key("tab:%s" % n).execute()
+        key("tab:%s" % n).execute()
     else:
-        global_state.update_cursor()
-        Key("tab:%s" % n).execute()
+        update_cursor()
+        key("tab:%s" % n).execute()
 
-    Key("shift:up/3").execute()
+    key("shift:up/3").execute()
 
 normal_data = {
-    "select": scopes["this"] + actions["select"][0],
-    "delete <n>": Function(remove_mark_or_update_cursor) + Key("del/3:%(n)d"),
-    "(back|backspace) [<n>]": Function(remove_mark_or_update_cursor) + Key("backspace/1:%(n)d"),
-    "paste": Function(remove_mark_or_update_cursor) + Key("c-v/3"),
+    "select": func(edit, action=Action.select, scope=Scope.this),
+    "delete <n>": sequence(func(remove_mark_or_update_cursor), key("del/3:%(n)d")),
+    "(back|backspace) [<n>]": sequence(func(remove_mark_or_update_cursor), key("backspace/1:%(n)d")),
+    "paste": sequence(func(remove_mark_or_update_cursor), key("c-v/3")),
 
-    "(new-line | new line) [<n>]": Function(remove_mark_or_update_cursor) + Key("end/3, enter/3:%(n)d"),
-    "(new-line | new line) [<n>] here": Function(remove_mark_or_update_cursor) + Key("enter/3:%(n)d"),
-    "indent [<n>]": Function(indent),
-    "unindent [<n>]": Function(unindent),
+    "(new-line | new line) [<n>]": sequence(func(remove_mark_or_update_cursor), key("end/3, enter/3:%(n)d")),
+    "(new-line | new line) [<n>] here": sequence(func(remove_mark_or_update_cursor), key("enter/3:%(n)d")),
+    "indent [<n>]": reversible(func(indent), func(unindent)),
+    "unindent [<n>]": reversible(func(unindent), func(indent)),
 
-    "undo": Key("c-z/3"),
-    "undo <n> [times]": Key("c-z/3:%(n)d"),
-    "redo": Key("c-y/3"),
-    "redo <n> [times]": Key("c-y/3:%(n)d"),
+    "undo": key("c-z/3"),
+    "undo <n> [times]": key("c-z/3:%(n)d"),
+    "redo": key("c-y/3"),
+    "redo <n> [times]": key("c-y/3:%(n)d"),
 
 }
 
 shell_data = {
-    "copy": Function(global_state.stop_marking) + Key("enter"),
-    "delete <n>": Key("del/3:%(n)d"),
-    "(back|backspace) [<n>]": Key("backspace/1:%(n)d"),
-    "paste": Mouse("right"),
+    "copy": func(global_state.stop_marking) + key("enter"),
+    "delete <n>": key("del/3:%(n)d"),
+    "(back|backspace) [<n>]": key("backspace/1:%(n)d"),
+    "paste": mouse("right"),
 }
 
 
-class KeystrokeRule(MappingRule):
+class keystrokeRule(MappingRule):
     extras = [
         IntegerRef("n", 1, 100)
     ]
@@ -155,7 +191,7 @@ class KeystrokeRule(MappingRule):
 
 def create_grammar():
     grammar = Grammar("edit")
-    grammar.add_rule(KeystrokeRule(shell_data, shell_context))
-    grammar.add_rule(KeystrokeRule(normal_data, normal_context))
+    grammar.add_rule(keystrokeRule(shell_data, shell_context))
+    grammar.add_rule(keystrokeRule(normal_data, normal_context))
     grammar.add_rule(NormalActionRule())
     return grammar, True

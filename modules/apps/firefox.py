@@ -1,8 +1,8 @@
 from dragonfly import *
 
 mapping = {
-    "[go] back [<n>]": Key("a-left/15:%(n)d"),
-    "[go] forward [<n>]": Key("a-right/15:%(n)d"),
+    "go back [<n>]": Key("a-left/15:%(n)d"),
+    "go forward [<n>]": Key("a-right/15:%(n)d"),
     "[open] new window": Key("c-n"),
     "close window": Key("cs-w"),
     "undo close window": Key("cs-n"),
@@ -34,5 +34,5 @@ mapping = {
 def create_grammar():
     firefox_context = AppContext(executable="firefox")
     grammar = Grammar("firefox", context=firefox_context)
-    grammar.add_rule(MappingRule(mapping=mapping, extras=[IntegerRef("n", 1, 9)]))
+    grammar.add_rule(MappingRule(mapping=mapping, extras=[IntegerRef("n", 1, 9)], defaults={"n": 1}))
     return grammar, True

@@ -154,3 +154,11 @@ def format_text(text, format_type):
         result = method(result)
     return result
 
+
+def format_and_write_text(text, format_type):
+    from modules.command_tracker import text as _text
+
+    formatted = format_text(text, format_type)
+    _text(formatted).execute()
+
+

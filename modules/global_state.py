@@ -1,5 +1,6 @@
-from dragonfly import Grammar, Function, MappingRule, Key, Mouse
+from dragonfly import Grammar, Function, MappingRule, Key, Mouse, Clipboard
 import win32api, win32con
+
 
 is_dictating = False
 dictation = None
@@ -13,11 +14,6 @@ nesting_levels = []
 
 def add_dictation_incompatible_grammar(grammar):
     __dictation_incompatible_grammars.append(grammar)
-
-
-def update_cursor():
-    if is_cursor_following_mouse:
-        Mouse("left").execute()
 
 
 def stop_marking():
@@ -108,6 +104,26 @@ def __toggle_marking():
 def __toggle_cursor():
     global is_cursor_following_mouse
     is_cursor_following_mouse = not is_cursor_following_mouse
+
+
+def load_data(data):
+    global is_cursor_following_mouse
+    is_cursor_following_mouse = data["is_cursor_following_mouse"]
+    global is_marking
+    is_marking = data["is_marking"]
+    global is_something_marked
+    is_something_marked = data["is_something_marked"]
+    global nesting_levels
+    nesting_levels = data["nesting_levels"]
+
+
+def save_data():
+    data = {}
+    data["is_cursor_following_mouse"] = is_cursor_following_mouse
+    data["is_marking"] = is_marking
+    data["is_something_marked"] = is_something_marked
+    data["nesting_levels"] = nesting_levels
+    return data
 
 
 def create_grammar():

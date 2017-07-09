@@ -51,19 +51,18 @@ import win32api, win32con, win32gui
 from dragonfly import (Grammar, Alternative, RuleRef, DictListRef,
                        Dictation, Compound, Rule, CompoundRule,
                        Choice, Window, Rectangle, monitors,
-                       Config, Section, Item, FocusWindow, ActionError)
+                       Config, Section, Item, FocusWindow, ActionError, Mouse)
 
 
 window_names = {}
 monitor_names = {}
 
 
-default_monitors_file = """{
+default_monitors_file = {
     "monitor_names": {
         "main": 0
     }
 }
-"""
 
 
 def load_config(config_path):
@@ -78,13 +77,15 @@ def load_config(config_path):
 def create_grammar():
     class WinSelectorRule(CompoundRule):
 
-        spec = "window | win | window <window_name>"
+        spec = "this (window) | window | win | window <window_name>"
         extras = [Choice("window_name", window_names)]
         exported = False
 
         def value(self, node):
             if node.has_child_with_name("window_name"):
                 return node.get_child_by_name("window_name").value()
+            if node.words()[0] == "this":
+                Mouse("left/3").execute()
             return Window.get_foreground()
 
     win_selector = RuleRef(WinSelectorRule(), name="win_selector")
